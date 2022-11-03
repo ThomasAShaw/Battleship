@@ -1,8 +1,9 @@
 import java.util.*;
 
 public class Ship {
-    private final Map<Coordinate, Boolean> occupiedCoordinates = new HashMap<>();
+    private final ArrayList<Coordinate> occupiedCoordinates = new ArrayList<>();
     private final String name;
+    private boolean isSunk = false;
 
     /**
      * Initialize a new Ship object.
@@ -11,33 +12,33 @@ public class Ship {
      * @param endCoordinate the ending Coordinate of the ship.
      */
     public Ship(String name, Coordinate startCoordinate, Coordinate endCoordinate) {
-        // Check coordinates are in line (NO DIAGONALS)
+        /* Check coordinates are in line (NO DIAGONALS) */
         if (!isLinear(startCoordinate, endCoordinate)) {
-            throw new IllegalArgumentException("Coordinates must line on same x-line or y-line. No diagonals either!");
+            throw new IllegalArgumentException("Coordinates must line on same x-line or y-line; no diagonals!");
         }
 
         this.name = name;
-        occupiedCoordinates.put(startCoordinate, false);
+        occupiedCoordinates.add(startCoordinate);
 
         int xDistance = startCoordinate.getX() - endCoordinate.getX();
         int yDistance = startCoordinate.getY() - endCoordinate.getY();
         int counter = 0;
 
         while (xDistance != 0 || yDistance != 0) {
-            if (xDistance > 0) {
-                occupiedCoordinates.put(new Coordinate((startCoordinate.getX() + counter), startCoordinate.getY()), false);
+            if (xDistance > 0) { /* East facing ship. */
+                occupiedCoordinates.add(new Coordinate((startCoordinate.getX() + counter), startCoordinate.getY()));
                 counter++;
                 xDistance--;
-            } else if (xDistance < 0) {
-                occupiedCoordinates.put(new Coordinate((startCoordinate.getX() - counter), startCoordinate.getY()), false);
+            } else if (xDistance < 0) { /* West facing ship. */
+                occupiedCoordinates.add(new Coordinate((startCoordinate.getX() - counter), startCoordinate.getY()));
                 counter++;
                 xDistance++;
-            } else if (yDistance > 0) {
-                occupiedCoordinates.put(new Coordinate(startCoordinate.getX(), (startCoordinate.getY() + counter)), false);
+            } else if (yDistance > 0) { /* North facing ship. */
+                occupiedCoordinates.add(new Coordinate(startCoordinate.getX(), (startCoordinate.getY() + counter)));
                 counter++;
                 yDistance--;
-            } else {
-                occupiedCoordinates.put(new Coordinate(startCoordinate.getX(), (startCoordinate.getY() + counter)), false);
+            } else { /* South facing ship. */
+                occupiedCoordinates.add(new Coordinate(startCoordinate.getX(), (startCoordinate.getY() + counter)));
                 counter++;
                 yDistance++;
             }
@@ -45,15 +46,15 @@ public class Ship {
     }
 
     /**
-     * Return a set of all occupied coordinates.
-     * @return set containing all coordinates occupied by the ship.
+     * Return a list of all occupied Coordinates.
+     * @return set containing all Coordinates occupied by the ship.
      */
-    public Set<Coordinate> getCoordinates() {
-        return occupiedCoordinates.keySet();
+    public List<Coordinate> getCoordinates() {
+        return occupiedCoordinates;
     }
 
     /**
-     * Return the ship's name.
+     * Return the Ship's name.
      * @return the name of the ship.
      */
     public String getName() {
@@ -61,28 +62,17 @@ public class Ship {
     }
 
     /**
-     * Attempt to hit one of the ship's coordinates.
-     * @param guessCoordinate coordinate to hit.
-     * @return true if guessed coordinate successfully hit the ship;
-     * false if not a ship coordinate or was already hit at this coordinate.
-     */
-    public boolean hitShip(Coordinate guessCoordinate) {
-        Boolean hitStatus = occupiedCoordinates.containsKey(guessCoordinate);
-        if (hitStatus == null || hitStatus) {
-            return false;
-        }
-
-        occupiedCoordinates.put(guessCoordinate, true);
-        return true;
-    }
-
-    /**
-     * Check if the ship is sunk.
+     * Check if the Ship is sunk.
      * @return true if ship is sunk, false otherwise.
      */
     public boolean isSunk() {
-        if (occupiedCoordinates.containsValue(false)) {
-            return false;
+        if (!isSunk) {
+            for (Coordinate c : occupiedCoordinates) {
+                if (!c.isGuessed()) {
+                    return false;
+                }
+            }
+            isSunk = true;
         }
 
         return true;
@@ -112,11 +102,11 @@ public class Ship {
         }
 
         Ship objShip = (Ship) obj;
-        return Objects.equals(occupiedCoordinates.keySet(), objShip.occupiedCoordinates.keySet()) && Objects.equals(name, objShip.name);
+        return Objects.equals(occupiedCoordinates, objShip.occupiedCoordinates) && Objects.equals(name, objShip.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(occupiedCoordinates.keySet(), name);
+        return Objects.hash(occupiedCoordinates, name);
     }
 }
