@@ -3,7 +3,6 @@ import java.util.Objects;
 public class Coordinate {
     private final int x;
     private final int y;
-    private boolean hit;
 
     /**
      * Initialises a new Coordinate object.
@@ -13,7 +12,6 @@ public class Coordinate {
     public Coordinate(int x, int y) {
         this.x = x;
         this.y = y;
-        this.hit = false;
     }
 
     /**
@@ -30,22 +28,6 @@ public class Coordinate {
      */
     public int getY() {
         return y;
-    }
-
-    /**
-     * Provides the coordinate's hit-value.
-     * @return whether the coordinate has been hit or not.
-     */
-    public boolean isHit() {
-        return hit;
-    }
-
-    /**
-     * Modifies the hit-value.
-     * @param isHit the hit-value to set coordinate to.
-     */
-    public void setHit(boolean isHit) {
-        this.hit = isHit;
     }
 
     @Override
