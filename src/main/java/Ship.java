@@ -8,11 +8,15 @@ public class Ship {
     /**
      * Initialize a new Ship object.
      * @param name the name of the ship.
-     * @param startCoordinate the starting Coordinate of the ship.
-     * @param endCoordinate the ending Coordinate of the ship.
+     * @param startCoordinate the starting Coordinate of the ship; not null.
+     * @param endCoordinate the ending Coordinate of the ship; not null.
      */
     public Ship(String name, Coordinate startCoordinate, Coordinate endCoordinate) {
         /* Check coordinates are in line (NO DIAGONALS) */
+        if (startCoordinate == null || endCoordinate == null) {
+            throw new IllegalArgumentException("Coordinate(s) cannot be null.");
+        }
+
         if (!isLinear(startCoordinate, endCoordinate)) {
             throw new IllegalArgumentException("Coordinates must line on same x-line or y-line; no diagonals!");
         }
@@ -41,6 +45,28 @@ public class Ship {
                 occupiedCoordinates.add(new Coordinate(startCoordinate.getX(), (startCoordinate.getY() + counter)));
                 counter++;
                 yDistance++;
+            }
+        }
+    }
+
+    /**
+     * Initialize a new Ship object.
+     * @param name the name of the ship.
+     * @param coords all the occupying coordinates of the ship; coordinates must be in a line, with no diagonals.
+     */
+    public Ship(String name, List<Coordinate> coords) {
+        this.name = name;
+        /* Ensure coordinates are in proper form. */
+        if (coords.size() == 0) {
+            throw new IllegalArgumentException("Ship must occupy at least one coordinate");
+        }
+
+        occupiedCoordinates.add(new Coordinate(coords.get(0).getX(), coords.get(0).getY()));
+        for (int i = 0; i < coords.size(); i++) {
+            if (isLinear(coords.get(i), coords.get(i + 1))) {
+                occupiedCoordinates.add(new Coordinate(coords.get(i + 1).getX(), coords.get(i + 1).getY()));
+            } else {
+                throw new IllegalArgumentException("Coordinates must be in linear order, with no diagonals.");
             }
         }
     }

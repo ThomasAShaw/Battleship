@@ -24,7 +24,7 @@ public class Coordinate {
      */
     public boolean setShip(Ship ship) {
         /* Occupying ship can only be set once, otherwise doesn't change. */
-        if (occupyingShip == null) {
+        if (isOccupied()) {
             return false;
         }
 
@@ -54,6 +54,18 @@ public class Coordinate {
      */
     public boolean isGuessed() {
         return guessed;
+    }
+
+    /**
+     * Provides the coordinate's occupied-value.
+     * @return whether the coordinate is occupied by a ship already or not.
+     */
+    public boolean isOccupied() {
+        if (occupyingShip == null) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
