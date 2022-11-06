@@ -1,3 +1,5 @@
+package battleship;
+
 import java.util.Objects;
 
 public class Coordinate {
@@ -7,7 +9,7 @@ public class Coordinate {
     private Ship occupyingShip = null;
 
     /**
-     * Initialises a new Coordinate object.
+     * Initialises a new battleship.Coordinate object.
      * @param x the horizontal position.
      * @param y the vertical position.
      */
@@ -18,8 +20,8 @@ public class Coordinate {
     }
 
     /**
-     * Set the Ship that is occupying this coordinate.
-     * @param ship Ship that is occupying this coordinate.
+     * Set the battleship.Ship that is occupying this coordinate.
+     * @param ship battleship.Ship that is occupying this coordinate.
      * @return true if was successful; false if unsuccessful.
      */
     public boolean setShip(Ship ship) {
@@ -62,17 +64,29 @@ public class Coordinate {
      */
     public boolean isOccupied() {
         if (occupyingShip == null) {
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     /**
-     * Guesses this coordinate and attempts to hit a Ship.
+     * Returns a copy of the occupying Ship.
+     * @return a copy of the ship occupying this coordinate.
+     */
+    public Ship getOccupyingShip() {
+        return new Ship(occupyingShip.getName(), occupyingShip.getCoordinates());
+    }
+
+    /**
+     * Guesses this coordinate and attempts to hit a battleship.Ship.
      * @return true if it was a successful hit; false if unsuccessful.
      */
-    public boolean guessCoordinate() {
+    public boolean guessCoordinate() throws CoordinateAlreadyGuessedException {
+        if (guessed) {
+            throw new CoordinateAlreadyGuessedException();
+        }
+
         guessed = true;
         if (occupyingShip != null) {
             return true;

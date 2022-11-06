@@ -1,3 +1,5 @@
+package battleship;
+
 import java.util.*;
 
 public class Board {
@@ -5,7 +7,7 @@ public class Board {
     private Set<Ship> shipManager = new HashSet<>();
 
     /**
-     * Initialises a new Board object with the default 10 x 10 layout.
+     * Initialises a new battleship.Board object with the default 10 x 10 layout.
      */
     public Board() {
         this.boardMatrix = new Coordinate[10][10];
@@ -19,8 +21,8 @@ public class Board {
     }
 
     /**
-     * Place a Ship on the board.
-     * @param ship the Ship to place on the board; not null.
+     * Place a battleship.Ship on the board.
+     * @param ship the battleship.Ship to place on the board; not null.
      * @throws InvalidPlacementException when attempting to place ship in invalid location.
      */
     public void setShip(Ship ship) throws InvalidPlacementException {
@@ -31,7 +33,7 @@ public class Board {
         for (Coordinate c : shipCoords) {
             if (c.getY() > boardMatrix.length || c.getY() < 0
                     || c.getX() > boardMatrix[c.getY()].length || c.getX() < 0) {
-                throw new InvalidPlacementException("Ship coordinate(s) outside of board area.");
+                throw new InvalidPlacementException("battleship.Ship coordinate(s) outside of board area.");
             }
 
             if (boardMatrix[c.getY()][c.getY()].isOccupied()) {
@@ -52,17 +54,11 @@ public class Board {
      * Guess a location on the board to attempt to hit a ship.
      * @param coord coordinate to guess; not null.
      * @return true if guess successfully hit a ship, false otherwise.
-     * @throws LocationAlreadyGuessedException if location was already guessed.
+     * @throws CoordinateAlreadyGuessedException if location was already guessed.
      */
-    public boolean guessLocation(Coordinate coord) throws LocationAlreadyGuessedException {
+    public boolean guessLocation(Coordinate coord) throws CoordinateAlreadyGuessedException {
         Coordinate guessedCoord = boardMatrix[coord.getY()][coord.getX()];
 
-        if (guessedCoord.isGuessed()) {
-            throw new LocationAlreadyGuessedException();
-        }
-
-        guessedCoord.guessCoordinate();
-
-        return guessedCoord.isOccupied();
+        return guessedCoord.guessCoordinate();
     }
 }

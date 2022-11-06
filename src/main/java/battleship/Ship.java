@@ -1,3 +1,5 @@
+package battleship;
+
 import java.util.*;
 
 public class Ship {
@@ -6,17 +8,17 @@ public class Ship {
     private boolean isSunk = false;
 
     /**
-     * Initialize a new Ship object.
+     * Initialize a new ship object.
      * @param name the name of the ship.
-     * @param startCoordinate the starting Coordinate of the ship; not null.
-     * @param endCoordinate the ending Coordinate of the ship; not null.
+     * @param startCoordinate the starting coordinate of the ship; not null.
+     * @param endCoordinate the ending coordinate of the ship; not null.
      */
     public Ship(String name, Coordinate startCoordinate, Coordinate endCoordinate) {
-        /* Check coordinates are in line (NO DIAGONALS) */
         if (startCoordinate == null || endCoordinate == null) {
             throw new IllegalArgumentException("Coordinate(s) cannot be null.");
         }
 
+        /* Check coordinates are in line (NO DIAGONALS) */
         if (!isLinear(startCoordinate, endCoordinate)) {
             throw new IllegalArgumentException("Coordinates must line on same x-line or y-line; no diagonals!");
         }
@@ -50,7 +52,7 @@ public class Ship {
     }
 
     /**
-     * Initialize a new Ship object.
+     * Initialize a new ship object.
      * @param name the name of the ship.
      * @param coords all the occupying coordinates of the ship; coordinates must be in a line, with no diagonals.
      */
@@ -62,7 +64,7 @@ public class Ship {
         }
 
         occupiedCoordinates.add(new Coordinate(coords.get(0).getX(), coords.get(0).getY()));
-        for (int i = 0; i < coords.size(); i++) {
+        for (int i = 0; i < coords.size() - 1; i++) {
             if (isLinear(coords.get(i), coords.get(i + 1))) {
                 occupiedCoordinates.add(new Coordinate(coords.get(i + 1).getX(), coords.get(i + 1).getY()));
             } else {
@@ -80,7 +82,7 @@ public class Ship {
     }
 
     /**
-     * Return the Ship's name.
+     * Return the ship's name.
      * @return the name of the ship.
      */
     public String getName() {
@@ -88,7 +90,7 @@ public class Ship {
     }
 
     /**
-     * Check if the Ship is sunk.
+     * Check if the ship is sunk.
      * @return true if ship is sunk, false otherwise.
      */
     public boolean isSunk() {
