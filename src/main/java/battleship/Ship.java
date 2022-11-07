@@ -6,6 +6,7 @@ public class Ship {
     private final ArrayList<Coordinate> occupiedCoordinates = new ArrayList<>();
     private final String name;
     private boolean isSunk = false;
+    static final int SIZE_LIMIT = 10;
 
     /**
      * Initialize a new ship object.
@@ -29,6 +30,11 @@ public class Ship {
         int xDistance = startCoordinate.getX() - endCoordinate.getX();
         int yDistance = startCoordinate.getY() - endCoordinate.getY();
         int counter = 0;
+
+        /* Check distance isn't greater than limit (add one to count starting coordinate). */
+        if (Math.abs(xDistance) + 1 > SIZE_LIMIT || Math.abs(yDistance) + 1 > SIZE_LIMIT) {
+            throw new IllegalArgumentException("Ship spans coordinates greater than size limit.");
+        }
 
         while (xDistance != 0 || yDistance != 0) {
             if (xDistance > 0) { /* East facing ship. */
@@ -54,11 +60,15 @@ public class Ship {
     /**
      * Initialize a new ship object.
      * @param name the name of the ship.
-     * @param coords all the occupying coordinates of the ship; coordinates must be in a line, with no diagonals.
+     * @param coords all the occupying coordinates of the ship; coordinates must be in a line, with no diagonals; not null.
      */
     public Ship(String name, List<Coordinate> coords) {
         this.name = name;
         /* Ensure coordinates are in proper form. */
+        if (coords == null) {
+            throw new IllegalArgumentException("Coordinate(s) cannot be null.");
+        }
+
         if (coords.size() == 0) {
             throw new IllegalArgumentException("Ship must occupy at least one coordinate");
         }
