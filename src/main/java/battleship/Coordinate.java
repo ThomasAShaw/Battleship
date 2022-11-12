@@ -75,7 +75,10 @@ public class Coordinate {
      * @return a copy of the ship occupying this coordinate.
      */
     public Ship getOccupyingShip() {
-        return new Ship(occupyingShip.getName(), occupyingShip.getCoordinates());
+        if (occupyingShip != null) {
+            return new Ship(occupyingShip.getName(), occupyingShip.getCoordinates());
+        }
+        return null;
     }
 
     /**
