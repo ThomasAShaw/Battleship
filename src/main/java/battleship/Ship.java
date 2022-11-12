@@ -25,11 +25,11 @@ public class Ship {
         }
 
         this.name = name;
-        occupiedCoordinates.add(startCoordinate);
+        occupiedCoordinates.add(new Coordinate(startCoordinate.getX(), startCoordinate.getY()));
 
-        int xDistance = startCoordinate.getX() - endCoordinate.getX();
-        int yDistance = startCoordinate.getY() - endCoordinate.getY();
-        int counter = 0;
+        int xDistance = endCoordinate.getX() - startCoordinate.getX();
+        int yDistance = endCoordinate.getY() - startCoordinate.getY();
+        int counter = 1; // Add one as we add the starting coordinate beforehand.
 
         /* Check distance isn't greater than limit (add one to count starting coordinate). */
         if (Math.abs(xDistance) + 1 > SIZE_LIMIT || Math.abs(yDistance) + 1 > SIZE_LIMIT) {
@@ -50,11 +50,13 @@ public class Ship {
                 counter++;
                 yDistance--;
             } else { /* South facing ship. */
-                occupiedCoordinates.add(new Coordinate(startCoordinate.getX(), (startCoordinate.getY() + counter)));
+                occupiedCoordinates.add(new Coordinate(startCoordinate.getX(), (startCoordinate.getY() - counter)));
                 counter++;
                 yDistance++;
             }
         }
+
+        setCoordsOccupied();
     }
 
     /**
@@ -81,14 +83,17 @@ public class Ship {
                 throw new IllegalArgumentException("Coordinates must be in linear order, with no diagonals.");
             }
         }
+
+        setCoordsOccupied();
     }
 
     /**
      * Return a list of all occupied Coordinates.
-     * @return set containing all Coordinates occupied by the ship.
+     * @return list containing all Coordinates occupied by the ship.
+     * NOTE: coordinates mutated in list will mutate this ship's coordinates; this is deliberate.
      */
     public List<Coordinate> getCoordinates() {
-        return occupiedCoordinates;
+        return new ArrayList<>(occupiedCoordinates);
     }
 
     /**
@@ -128,6 +133,16 @@ public class Ship {
         }
 
         return false;
+    }
+
+    /**
+     * Set all coordinates of the ship as occupied by this ship.
+     * Used by constructors when setting up occupied coordinates.
+     */
+    private void setCoordsOccupied() {
+        for (Coordinate c : occupiedCoordinates) {
+            c.setShip(this);
+        }
     }
 
     @Override
