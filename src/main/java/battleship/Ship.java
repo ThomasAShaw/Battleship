@@ -69,10 +69,10 @@ public class Ship {
         /* Ensure coordinates are in proper form. */
         if (coords == null) {
             throw new IllegalArgumentException("Coordinate(s) cannot be null.");
-        }
-
-        if (coords.size() == 0) {
+        } else if (coords.size() == 0) {
             throw new IllegalArgumentException("Ship must occupy at least one coordinate");
+        } else if(coords.size() > SIZE_LIMIT) {
+            throw new IllegalArgumentException("Ship spans coordinates greater than size limit.");
         }
 
         occupiedCoordinates.add(new Coordinate(coords.get(0).getX(), coords.get(0).getY()));
