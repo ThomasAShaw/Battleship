@@ -110,7 +110,12 @@ public class Board {
         return false;
     }
 
-    private boolean coordinateOutsideBoard(Coordinate coordinate) {
+    /**
+     * Check if a coordinate is outside the board.
+     * @param coordinate coordinate to check; not null.
+     * @return true if outside board and therefore invalid, false otherwise.
+     */
+    public boolean coordinateOutsideBoard(Coordinate coordinate) {
         return coordinate.getY() >= boardMatrix.length || coordinate.getY() < 0
                 || coordinate.getX() >= boardMatrix[coordinate.getY()].length || coordinate.getX() < 0;
     }
