@@ -3,8 +3,8 @@ package battleship;
 import java.util.*;
 
 public class Board {
-    private Coordinate[][] boardMatrix;
-    private Set<Ship> shipManager = new HashSet<>();
+    private final Coordinate[][] boardMatrix;
+    private final Set<Ship> shipManager = new HashSet<>();
 
     /**
      * Initialises a new board object with the default 10 x 10 layout.
@@ -27,10 +27,10 @@ public class Board {
      */
     public void setShip(Ship ship) throws InvalidPlacementException {
         /* Check all coordinates not occupied and inside boardMatrix. */
-        List<Coordinate> shipCoords = ship.getCoordinates();
-        List<Coordinate> boardCoords = new ArrayList<>();
+        List<Coordinate> shipCoordinates = ship.getCoordinates();
+        List<Coordinate> boardCoordinates = new ArrayList<>();
 
-        for (Coordinate c : shipCoords) {
+        for (Coordinate c : shipCoordinates) {
             if (coordinateOutsideBoard(c)) {
                 throw new InvalidPlacementException("Ship coordinate(s) outside of board area.");
             }
@@ -45,10 +45,10 @@ public class Board {
         }
 
         /* Gather all coordinates for new ship, only after checking no exceptions. */
-        for (Coordinate c : shipCoords) {
-            boardCoords.add(boardMatrix[c.getY()][c.getX()]);
+        for (Coordinate c : shipCoordinates) {
+            boardCoordinates.add(boardMatrix[c.getY()][c.getX()]);
         }
-        Ship shipToAdd = new Ship(ship.getName(), boardCoords);
+        Ship shipToAdd = new Ship(ship.getName(), boardCoordinates);
 
         /* Now set the coordinates to be linked to the ship. */
         for (Coordinate c : shipToAdd.getCoordinates()) {
@@ -71,8 +71,8 @@ public class Board {
             throw new IllegalArgumentException("Coordinate outside of board area.");
         }
 
-        Coordinate guessedCoord = boardMatrix[guessCoordinate.getY()][guessCoordinate.getX()];
-        return guessedCoord.guessCoordinate();
+        Coordinate guessedCoordinates = boardMatrix[guessCoordinate.getY()][guessCoordinate.getX()];
+        return guessedCoordinates.guessCoordinate();
     }
 
     /**
@@ -103,11 +103,7 @@ public class Board {
      * @return true if all ships are sunk, false otherwise.
      */
     public boolean allShipsSunk() {
-        if (numShipsSunk() == numShips()) {
-            return true;
-        }
-
-        return false;
+        return numShipsSunk() == numShips();
     }
 
     /**

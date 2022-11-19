@@ -56,35 +56,36 @@ public class Ship {
             }
         }
 
-        setCoordsOccupied();
+        setOccupiedCoordinates();
     }
 
     /**
      * Initialize a new ship object.
      * @param name the name of the ship.
-     * @param coords all the occupying coordinates of the ship; coordinates must be in a line, with no diagonals; not null.
+     * @param coordinates all the occupying coordinates of the ship; coordinates must be in a line,
+     *               with no diagonals; not null.
      */
-    public Ship(String name, List<Coordinate> coords) {
+    public Ship(String name, List<Coordinate> coordinates) {
         this.name = name;
         /* Ensure coordinates are in proper form. */
-        if (coords == null) {
+        if (coordinates == null) {
             throw new IllegalArgumentException("Coordinate(s) cannot be null.");
-        } else if (coords.size() == 0) {
+        } else if (coordinates.size() == 0) {
             throw new IllegalArgumentException("Ship must occupy at least one coordinate");
-        } else if(coords.size() > SIZE_LIMIT) {
+        } else if (coordinates.size() > SIZE_LIMIT) {
             throw new IllegalArgumentException("Ship spans coordinates greater than size limit.");
         }
 
-        occupiedCoordinates.add(new Coordinate(coords.get(0).getX(), coords.get(0).getY()));
-        for (int i = 0; i < coords.size() - 1; i++) {
-            if (isLinear(coords.get(i), coords.get(i + 1))) {
-                occupiedCoordinates.add(new Coordinate(coords.get(i + 1).getX(), coords.get(i + 1).getY()));
+        occupiedCoordinates.add(new Coordinate(coordinates.get(0).getX(), coordinates.get(0).getY()));
+        for (int i = 0; i < coordinates.size() - 1; i++) {
+            if (isLinear(coordinates.get(i), coordinates.get(i + 1))) {
+                occupiedCoordinates.add(new Coordinate(coordinates.get(i + 1).getX(), coordinates.get(i + 1).getY()));
             } else {
                 throw new IllegalArgumentException("Coordinates must be in linear order, with no diagonals.");
             }
         }
 
-        setCoordsOccupied();
+        setOccupiedCoordinates();
     }
 
     /**
@@ -128,18 +129,14 @@ public class Ship {
      * @return true if points lie on same x or y line, false if diagonal or any other case.
      */
     private boolean isLinear(Coordinate a, Coordinate b) {
-        if (a.getX() == b.getX() || a.getY() == b.getY()) {
-            return true;
-        }
-
-        return false;
+        return a.getX() == b.getX() || a.getY() == b.getY();
     }
 
     /**
      * Set all coordinates of the ship as occupied by this ship.
      * Used by constructors when setting up occupied coordinates.
      */
-    private void setCoordsOccupied() {
+    private void setOccupiedCoordinates() {
         for (Coordinate c : occupiedCoordinates) {
             c.setShip(this);
         }
