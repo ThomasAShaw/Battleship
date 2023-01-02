@@ -1,9 +1,7 @@
 package battleship;
 
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ShipTests {
@@ -149,11 +147,6 @@ public class ShipTests {
 
     @Test
     public void testShipCoordSetting() {
-        List<Coordinate> coordsList = List.of(
-                new Coordinate(-100, 12644),
-                new Coordinate(-100, 12645),
-                new Coordinate(-100, 12646)
-        );
         Ship myShip = new Ship("Testing Ship", new Coordinate(-5, 0), new Coordinate(-4, 0));
         List<Coordinate> shipCoords = myShip.getCoordinates();
 

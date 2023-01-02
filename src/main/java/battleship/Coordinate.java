@@ -63,11 +63,7 @@ public class Coordinate {
      * @return whether the coordinate is occupied by a ship already or not.
      */
     public boolean isOccupied() {
-        if (occupyingShip == null) {
-            return false;
-        }
-
-        return true;
+        return occupyingShip != null;
     }
 
     /**
@@ -91,11 +87,8 @@ public class Coordinate {
         }
 
         guessed = true;
-        if (occupyingShip != null) {
-            return true;
-        }
 
-        return false;
+        return occupyingShip != null;
     }
 
     @Override
