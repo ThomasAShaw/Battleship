@@ -7,4 +7,7 @@ module com.example.battleship {
 
     opens com.example.battleship to javafx.fxml;
     exports com.example.battleship;
+
+    opens battleship.ui to javafx.fxml;
+    exports battleship.ui;
 }

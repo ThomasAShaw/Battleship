@@ -22,7 +22,7 @@ public class Board {
 
     /**
      * Place a ship on the board.
-     * @param ship the battleship.Ship to place on the board; not null.
+     * @param ship the ship to place on the board; not null.
      * @throws InvalidPlacementException when attempting to place ship in invalid location.
      */
     public void setShip(Ship ship) throws InvalidPlacementException {
@@ -114,5 +114,31 @@ public class Board {
     public boolean coordinateOutsideBoard(Coordinate coordinate) {
         return coordinate.getY() >= boardMatrix.length || coordinate.getY() < 0
                 || coordinate.getX() >= boardMatrix[coordinate.getY()].length || coordinate.getX() < 0;
+    }
+
+    /**
+     * Get information on a coordinate at the position (x,y) on the board.
+     * @param x horizontal position of coordinate on board.
+     * @param y vertical position of coordinate on board.
+     * @return a duplicated coordinate at the specified position, but does not have the same occupying ship.
+     */
+    public Coordinate getCoordinate(int x, int y) {
+        /* Occupying ship is different for duplicatedCoordinate than boardCoordinate to avoid accidental modification. */
+        Coordinate boardCoordinate = boardMatrix[y][x];
+        Coordinate duplicatedCoordinate = new Coordinate(boardCoordinate.getX(), boardCoordinate.getY(), boardCoordinate.isGuessed(), null);
+
+        if (boardCoordinate.isOccupied()) {
+            duplicatedCoordinate.setShip(new Ship(boardCoordinate.getOccupyingShip().getName(), duplicatedCoordinate, duplicatedCoordinate));
+        }
+
+        return duplicatedCoordinate;
+    }
+
+    public int getXSize() {
+        return boardMatrix[0].length;
+    }
+
+    public int getYSize() {
+        return boardMatrix.length;
     }
 }
