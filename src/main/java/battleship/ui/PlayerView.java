@@ -10,8 +10,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PlayerView {
     // TODO: placing ships, shooting ships, and waiting.
@@ -19,9 +17,11 @@ public class PlayerView {
     private final Board playerBoard;
     public static final double GRID_CELL_SIZE = 50;
     private int shipsPlaced = 0;
+    private boolean[][] occupiedCoords;
 
     public PlayerView(Board playerBoard) {
         this.playerBoard = playerBoard;
+        occupiedCoords = new boolean[playerBoard.getYSize()][playerBoard.getXSize()];
     }
 
     public Parent getPlayerView() throws InvalidPlacementException {
@@ -36,6 +36,7 @@ public class PlayerView {
      * @return the window of the preparation view.
      */
     public Parent getPreparationView(boolean isPlayerOne) {
+
         BorderPane preparationLayout = new BorderPane();
         GridPane activePlayerGrid = new GridPane();
         VBox shipPlacingBox = new VBox();
@@ -124,6 +125,7 @@ public class PlayerView {
         source.setOnDragDetected((MouseEvent event) -> {
             Dragboard db = source.startDragAndDrop(TransferMode.ANY);
 
+            /* put a string on dragboard */
             ClipboardContent content = new ClipboardContent();
             content.putString(source.getText() + "\n" + source.getWidth() / GRID_CELL_SIZE);
             db.setContent(content);
@@ -190,30 +192,39 @@ public class PlayerView {
             // TODO: This is quite messy.
             Button buttonAtTarget = (Button) target.getChildren().get(target.getChildren().size() - 1);
             if (db.hasString() && buttonAtTarget.getText().isEmpty()) {
-                shipsPlaced++;
-                String[] buttonData = db.getString().split("\n");
-                Button shipButton = (Button) target.getChildren().get(target.getChildren().size() - 1);
-                shipButton.setText("S" + shipsPlaced);
-
-                // Communicate to nearby buttons
-                // Todo: currently only does rightwards
+                // Check to ensure nearby buttons are not occupied.
                 GridPane grid = (GridPane) target.getParent();
-                int xCoord = GridPane.getColumnIndex(target);
-                int yCoord = GridPane.getRowIndex(target);
-
-                for (int i = 1; i < Math.round(Double.parseDouble(buttonData[1])); i++) { // Minus 1 as we already did the current square.
-                    StackPane cell = (StackPane) getNodeFromGridPane(grid, xCoord + i, yCoord);
-                    if (cell != null) {
-                        Button cellButton = (Button) cell.getChildren().get(cell.getChildren().size() - 1);
-                        cellButton.setText("S" + shipsPlaced);
+                int xCoord = GridPane.getColumnIndex(target) - 1; // as the letter and numbers on the side add 1.
+                int yCoord = GridPane.getRowIndex(target) - 1;
+                String[] buttonData = db.getString().split("\n");
+                boolean canFit = true;
+                // Todo: currently only does rightwards
+                for (int i = 0; i < Math.round(Double.parseDouble(buttonData[1])); i++) {
+                    if (playerBoard.coordinateOutsideBoard(new Coordinate(xCoord + i, yCoord)) || occupiedCoords[yCoord][xCoord + i]) {
+                        canFit = false;
+                        break;
                     }
                 }
 
-                target.getChildren().clear();
-                target.getChildren().add(shipButton);
+                if (canFit) {
+                    shipsPlaced++;
 
-                success = true;
+                    // Communicate to nearby buttons
+                    for (int i = 0; i < Math.round(Double.parseDouble(buttonData[1])); i++) { // minus 1 as we already did the current square.
+                        StackPane cell = (StackPane) getNodeFromGridPane(grid, xCoord + i + 1, yCoord + 1);
+                        if (cell != null) {
+                            Button cellButton = (Button) cell.getChildren().get(cell.getChildren().size() - 1);
+                            cellButton.setText("S" + shipsPlaced);
+                            occupiedCoords[yCoord][xCoord + i] = true;
+                        } else {
+                            throw new RuntimeException("oops");
+                        }
+                    }
+
+                    success = true;
+                }
             }
+
             event.setDropCompleted(success);
 
             event.consume();
