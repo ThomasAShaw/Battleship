@@ -159,4 +159,11 @@ public class Ship {
     public int hashCode() {
         return Objects.hash(occupiedCoordinates, name);
     }
+
+    /**
+     * @return the length of the ship.
+     */
+    public int getShipLength() {
+        return occupiedCoordinates.size();
+    }
 }

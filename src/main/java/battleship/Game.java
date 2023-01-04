@@ -1,12 +1,22 @@
 package battleship;
 
+import java.util.Collections;
+import java.util.List;
+
 public class Game {
     private final Board playerOne, playerTwo;
     private boolean gameStarted = false;
     private boolean gameOver = false;
+    public final static List<Ship> DEFAULT_SHIPS = Collections.unmodifiableList(
+            List.of(new Ship("Carrier", new Coordinate(0, 0), new Coordinate(0, 4)),
+                    new Ship("Battleship", new Coordinate(0, 0), new Coordinate(0, 3)),
+                    new Ship("Cruiser", new Coordinate(0, 0), new Coordinate(0, 2)),
+                    new Ship("Submarine", new Coordinate(0,0), new Coordinate(0,2)),
+                    new Ship("Destroyer", new Coordinate(0,0), new Coordinate(0, 1)))
+    );
 
     /**
-     * Initializes a new Game object.
+     * Initialises a new Game object, with the default board size and ships.
      */
     public Game() {
         this.playerOne = new Board();

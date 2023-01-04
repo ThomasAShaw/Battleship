@@ -1,6 +1,5 @@
 package battleship;
 
-import java.util.List;
 import java.util.Objects;
 
 public class Coordinate {
@@ -21,7 +20,7 @@ public class Coordinate {
     }
 
     /**
-     Duplicate this coordinate, but with more specifications.
+     * Initialises a new Coordinate object, but with more specifications.
      * @param x the horizontal position.
      * @param y the vertical position.
      * @param isGuessed whether this coordinate has been guessed or not.

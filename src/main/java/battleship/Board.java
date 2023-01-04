@@ -5,12 +5,13 @@ import java.util.*;
 public class Board {
     private final Coordinate[][] boardMatrix;
     private final Set<Ship> shipManager = new HashSet<>();
+    public static final int DEFAULT_SIZE = 10;
 
     /**
      * Initialises a new board object with the default 10 x 10 layout.
      */
     public Board() {
-        this.boardMatrix = new Coordinate[10][10];
+        this.boardMatrix = new Coordinate[DEFAULT_SIZE][DEFAULT_SIZE];
 
         /* Initialize boardMatrix. */
         for (int y = 0; y < boardMatrix.length; y++) {
@@ -117,12 +118,17 @@ public class Board {
     }
 
     /**
-     * Get information on a coordinate at the position (x,y) on the board.
+     Get information on a coordinate at the position (x,y) on the board.
      * @param x horizontal position of coordinate on board.
      * @param y vertical position of coordinate on board.
      * @return a duplicated coordinate at the specified position, but does not have the same occupying ship.
+     * @throws InvalidPlacementException when attempting to access coordinate in invalid location.
      */
-    public Coordinate getCoordinate(int x, int y) {
+    public Coordinate getCoordinate(int x, int y) throws InvalidPlacementException {
+        if (coordinateOutsideBoard(new Coordinate(x, y))) {
+            throw new InvalidPlacementException("Coordinate outside of board area.");
+        }
+
         /* Occupying ship is different for duplicatedCoordinate than boardCoordinate to avoid accidental modification. */
         Coordinate boardCoordinate = boardMatrix[y][x];
         Coordinate duplicatedCoordinate = new Coordinate(boardCoordinate.getX(), boardCoordinate.getY(), boardCoordinate.isGuessed(), null);
@@ -132,6 +138,20 @@ public class Board {
         }
 
         return duplicatedCoordinate;
+    }
+
+    /**
+     * Reset a specified coordinate to default values.
+     * @param x horizontal position of coordinate on board.
+     * @param y vertical position of coordinate on board.
+     * @throws InvalidPlacementException when attempting to access coordinate in invalid location.
+     */
+    public void resetCoordinate(int x, int y) throws InvalidPlacementException {
+        if (coordinateOutsideBoard(new Coordinate(x, y))) {
+            throw new InvalidPlacementException("Coordinate outside of board area.");
+        }
+
+        boardMatrix[y][x] = new Coordinate(x, y);
     }
 
     public int getXSize() {
