@@ -1,10 +1,9 @@
 package battleship.ui;
 
-import battleship.Board;
+import battleship.Game;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -14,8 +13,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-
-import java.util.List;
 
 public class BattleshipApplication extends Application {
 
@@ -36,7 +33,7 @@ public class BattleshipApplication extends Application {
 
 
         Pane firstLayout = getMainMenuView();
-        PlayerView pv = new PlayerView(new Board());
+        PlayerView pv = new PlayerView(new Game(), true);
 
         Parent secondLayout = pv.getPlayerView();
 

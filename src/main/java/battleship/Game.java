@@ -1,5 +1,6 @@
 package battleship;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -149,5 +150,60 @@ public class Game {
      */
     public void endGame() {
         this.gameOver = true;
+    }
+
+    /**
+     * Get board width for a specific player.
+     * @param isPlayerOne true if referring to first player, false for second player.
+     * @return horizontal width of the specified player's board.
+     */
+    public int getBoardWidth(boolean isPlayerOne) {
+        if (isPlayerOne) {
+            return playerOne.getXSize();
+        }
+
+        return playerTwo.getXSize();
+    }
+
+    /**
+     * Get board height for a specific player.
+     * @param isPlayerOne true if referring to first player, false for second player.
+     * @return vertical height of the specified player's board.
+     */
+    public int getBoardHeight(boolean isPlayerOne) {
+        if (isPlayerOne) {
+            return playerOne.getYSize();
+        }
+
+        return playerTwo.getYSize();
+    }
+
+    /**
+     * Check if a coordinate is valid for a specific player's board.
+     * @param coordinate coordinate to check; not null.
+     * @param isPlayerOne true if referring to first player, false for second player.
+     * @return true if the given coordinate is valid for the specified player, false otherwise.
+     */
+    public boolean isValidCoordinate(Coordinate coordinate, boolean isPlayerOne) {
+        if (isPlayerOne) {
+            return !playerOne.coordinateOutsideBoard(coordinate);
+        }
+
+        return !playerTwo.coordinateOutsideBoard(coordinate);
+    }
+
+    /**
+     Get information on ships for a specified player.
+     * @param isPlayerOne true if referring to first player, false for second player.
+     * @return a list of ships for the specified player, but all begin at (0,0),
+     *         are oriented downwards, and are not the same ships used by this game.
+     */
+    public List<Ship> getShips(boolean isPlayerOne) {
+        // FIXME: Currently only returns default ships.
+        List<Ship> shipList = new ArrayList<>();
+        for (Ship s : DEFAULT_SHIPS) {
+            shipList.add(new Ship(s.getName(), new Coordinate(0, 0), new Coordinate(0, s.getShipLength() - 1)));
+        }
+        return shipList;
     }
 }

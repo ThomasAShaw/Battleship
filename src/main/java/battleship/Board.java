@@ -154,10 +154,16 @@ public class Board {
         boardMatrix[y][x] = new Coordinate(x, y);
     }
 
+    /**
+     * @return horizontal size of board.
+     */
     public int getXSize() {
         return boardMatrix[0].length;
     }
 
+    /**
+     * @return vertical size of board.
+     */
     public int getYSize() {
         return boardMatrix.length;
     }

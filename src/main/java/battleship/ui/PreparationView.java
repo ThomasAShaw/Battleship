@@ -2,8 +2,9 @@ package battleship.ui;
 
 import battleship.Board;
 import battleship.Coordinate;
+import battleship.Game;
+import battleship.Ship;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,23 +14,23 @@ import javafx.scene.layout.*;
 import java.util.*;
 
 public class PreparationView {
-    // TODO: placing ships, shooting ships, and waiting.
-    // TODO: unplaced ship list.
     // Specific to one player, for one game.
-    private final Board playerBoard;
+    private final Game game;
     public static final double GRID_CELL_SIZE = PlayerView.GRID_CELL_SIZE;
-    private int shipsPlaced = 0;
-    private Set<Coordinate> occupiedCoords;
-    private final Map<Coordinate, StackPane> gridCells;
-    private boolean isHorizontal;
-    private BorderPane preparationLayout;
-    private List<Button> shipButtons;
+    private final List<Ship> placedShips = new ArrayList<>();
+    private final List<Ship> allShips;
+    private final Set<Coordinate> occupiedCoords = new HashSet<>();
+    private final Map<Coordinate, StackPane> gridCells = new HashMap<>();
+    private boolean isHorizontal = true;
+    private BorderPane preparationLayout; // FIXME: potentially remove?
+    private List<Button> shipButtons = new ArrayList<>(); // FIXME: potentially remove?
+    private final boolean isPlayerOne;
+    private Label statusLabel; // FIXME: potentially remove?
 
-    public PreparationView(Board playerBoard) {
-        this.playerBoard = playerBoard;
-        occupiedCoords = new HashSet<>();
-        gridCells = new HashMap<>();
-        isHorizontal = true;
+    public PreparationView(Game game, boolean isPlayerOne) {
+        this.game = game;
+        this.isPlayerOne = isPlayerOne;
+        this.allShips = game.getShips(isPlayerOne);
     }
 
     /**
@@ -40,17 +41,17 @@ public class PreparationView {
         preparationLayout = new BorderPane();
         GridPane activePlayerGrid = new GridPane();
         VBox sideMenu = new VBox();
-        // Ships are horizontal on default.
+        /* Ships are horizontal on default. */
         VBox shipBox = new VBox();
 
-        // Create active player board grid
+        /* Create player board grid. */
         for (int i = 0; i < Board.DEFAULT_SIZE; i++) {
             activePlayerGrid.getColumnConstraints().add(new ColumnConstraints(50));
-            activePlayerGrid.getRowConstraints().add(new RowConstraints(50)); // TODO: may want to modify this.
+            activePlayerGrid.getRowConstraints().add(new RowConstraints(50));
         }
 
         /* Set letter and number labels on side of player grid. */
-        for (int i = 0; i < playerBoard.getXSize() + 1; i++) {
+        for (int i = 0; i < game.getBoardWidth(isPlayerOne) + 1; i++) {
             Label letterLabel = new Label(i > 0 && i < 27 ? String.valueOf((char) (i + 64)) : "");
             Label numberLabel = new Label(i > 0 ? Integer.toString(i) : "");
 
@@ -67,9 +68,9 @@ public class PreparationView {
         }
 
         /* Add buttons to player grid. */
-        for (int y = 0; y < playerBoard.getYSize(); y++) {
-            for (int x = 0; x < playerBoard.getXSize(); x++) {
-                // For dragging functionality
+        for (int y = 0; y < game.getBoardHeight(isPlayerOne); y++) {
+            for (int x = 0; x < game.getBoardWidth(isPlayerOne); x++) {
+                /* For dragging functionality... */
                 StackPane gridCell = new StackPane();
                 gridCell.setPrefSize(GRID_CELL_SIZE, GRID_CELL_SIZE);
                 setOnDragOver(gridCell);
@@ -82,45 +83,41 @@ public class PreparationView {
                 button.setStyle("-fx-background-radius: 0");
                 gridCell.getChildren().add(button);
                 activePlayerGrid.add(gridCell, x + 1, y + 1);
-                // Add one as letter and number cells take up first row and column, respectively.
+                /* Add one as letter and number cells take up first row and column, respectively. */
                 gridCells.put(new Coordinate(x + 1, y + 1), gridCell);
             }
         }
 
         /* Ship placing box. */
-        // Horizontal ships on default.
-        // Make ship buttons and properly size.
-        Button carrier = new Button("Carrier");
-        Button battleship = new Button("Battleship");
-        Button cruiser = new Button("Cruiser");
-        Button submarine = new Button("Submarine");
-        Button destroyer = new Button("Destroyer");
-        shipButtons = List.of(carrier, battleship, cruiser, submarine, destroyer);
+        setShipButtons();
 
-        carrier.setPrefSize(GRID_CELL_SIZE * 5, GRID_CELL_SIZE);
-        battleship.setPrefSize(GRID_CELL_SIZE * 4, GRID_CELL_SIZE);
-        cruiser.setPrefSize(GRID_CELL_SIZE * 3, GRID_CELL_SIZE);
-        submarine.setPrefSize(GRID_CELL_SIZE * 3, GRID_CELL_SIZE);
-        destroyer.setPrefSize(GRID_CELL_SIZE * 2, GRID_CELL_SIZE);
+        shipBox.getChildren().add(new Label("Ships to Place"));
+        shipBox.getChildren().addAll(shipButtons);
 
-        shipBox.getChildren().addAll(new Label("Ships to Place"), carrier, battleship, cruiser, submarine, destroyer);
-
-        // TODO: Handling dragging - look over this section.
-        setOnDragDetected(carrier);
-        setOnDragDetected(battleship);
-        setOnDragDetected(cruiser);
-        setOnDragDetected(submarine);
-        setOnDragDetected(destroyer);
-
-        setOnDragDone(carrier);
-        setOnDragDone(battleship);
-        setOnDragDone(cruiser);
-        setOnDragDone(submarine);
-        setOnDragDone(destroyer);
-
+        HBox sideMenuButtons = new HBox();
         Button rotateButton = new Button("Rotate");
+        Button resetButton = new Button("Reset");
+        Button confirmButton = new Button("Confirm");
+        statusLabel = new Label("");
+
         rotateButton.setOnAction((event) -> swapShipOrientation());
-        sideMenu.getChildren().addAll(rotateButton, shipBox);
+        resetButton.setOnAction((event) -> resetPlacement());
+        confirmButton.setOnAction((event) -> {
+            boolean success = confirmShipPlacement();
+
+            if (success) {
+                statusLabel.setStyle("-fx-background-color: green;");
+                statusLabel.setText("Successfully confirmed placement.");
+            } else {
+                statusLabel.setStyle("-fx-background-color: red;");
+                statusLabel.setText("Error confirming placement.");
+            }
+        });
+
+        sideMenuButtons.getChildren().addAll(rotateButton, resetButton, confirmButton);
+
+
+        sideMenu.getChildren().addAll(sideMenuButtons, statusLabel, shipBox);
 
         preparationLayout.setLeft(activePlayerGrid);
         preparationLayout.setRight(sideMenu);
@@ -265,13 +262,14 @@ public class PreparationView {
                 int xCoord = GridPane.getColumnIndex(targetCell) - 1; // As left number column is at position 0.
                 int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
                 String[] shipData = db.getString().split("\n"); // Copied cell data is stored in String format, separated by newline.
+                int shipLength = (int) Double.parseDouble(shipData[1]);
 
-                if (canPlaceHere(new Coordinate(xCoord, yCoord), (int) Math.round(Double.parseDouble(shipData[1])))) {
-                    shipsPlaced++;
+                if (canPlaceHere(new Coordinate(xCoord, yCoord), shipLength)) {
+                    int shipsPlaced = placedShips.size() + 1;
 
                     /* Set all required cells to signify occupied by ship. */
                     // TODO: Currently only does rightwards and downwards - issue with coords...?
-                    for (int i = 0; i < Double.parseDouble(shipData[1]); i++) {
+                    for (int i = 0; i < shipLength; i++) {
                         if (isHorizontal) {
                             StackPane cell =  gridCells.get(new Coordinate(xCoord + i + 1, yCoord + 1));
                             if (cell != null) {
@@ -291,10 +289,26 @@ public class PreparationView {
                                 throw new RuntimeException("Null cell.");
                             }
                         }
-
                     }
 
+                    /* Add ship to placedShips */
+                    System.out.println(xCoord + " " + yCoord);
+                    if (isHorizontal) {
+                        placedShips.add(new Ship(shipData[0], new Coordinate(xCoord, yCoord), new Coordinate(xCoord + shipLength - 1, yCoord)));
+                        // System.out.println((xCoord + shipLength -1) + " " + yCoord);
+                    } else {
+                        placedShips.add(new Ship(shipData[0], new Coordinate(xCoord, yCoord), new Coordinate(xCoord, yCoord + shipLength - 1)));
+                        // System.out.println(xCoord + " " + (yCoord + shipLength -1));
+                    }
+
+                    statusLabel.setText("");
+                    statusLabel.setStyle(null);
                     success = true;
+                }
+
+                if (!success) {
+                    statusLabel.setText("Error placing ship here.");
+                    statusLabel.setStyle("-fx-background-color: red;");
                 }
             }
 
@@ -314,7 +328,7 @@ public class PreparationView {
         Set<Coordinate> coordSet = getPotentialCoords(startCoordinate, shipLength);
 
         for (Coordinate coord : coordSet) {
-            if (playerBoard.coordinateOutsideBoard(coord)
+            if (!game.isValidCoordinate(coord, isPlayerOne)
                     || occupiedCoords.contains(coord)) {
                 return false;
             }
@@ -368,6 +382,70 @@ public class PreparationView {
                 shipBoxHorizontal.getChildren().add(ship);
             }
             sideMenu.getChildren().add(shipBoxHorizontal);
+        }
+    }
+
+    /**
+     * Resets the view by setting everything modified back to its original way.
+     */
+    private void resetPlacement() {
+        /* Reset all saved ships, coordinates, and reset ship buttons. */
+        placedShips.clear();
+        occupiedCoords.clear();
+        setShipButtons();
+
+        /* Reset gridCells. */
+        for(StackPane gridCell : gridCells.values()) {
+            Button gridButton = (Button) gridCell.getChildren().get(gridCell.getChildren().size() - 1);
+            gridButton.setText("");
+        }
+
+        /* Reset all labels and sideMenu. */
+        statusLabel.setText("");
+        statusLabel.setStyle(null);
+
+        VBox sideMenu = (VBox) preparationLayout.getRight();
+        sideMenu.getChildren().remove(sideMenu.getChildren().size() - 1);
+        VBox shipBox = new VBox();
+        shipBox.getChildren().add(new Label("Ships to Place"));
+        shipBox.getChildren().addAll(shipButtons);
+        sideMenu.getChildren().add(shipBox);
+    }
+
+    /**
+     * Confirm the placement of ships after being dragged onto board.
+     * @return true if ships were successfully set, false otherwise.
+     */
+    private boolean confirmShipPlacement() {
+        if (placedShips.size() != allShips.size()) {
+            return false;
+        }
+
+        for (Ship ship : placedShips) {
+            if (!game.setShip(isPlayerOne, ship)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Sets/resets all ship buttons back to their original way.
+     */
+    private void setShipButtons () {
+        isHorizontal = true;
+        shipButtons.clear();
+        for (Ship ship : allShips) {
+            // Make ship buttons and properly size, horizontal on default.
+            Button button = new Button(ship.getName());
+            button.setPrefSize(GRID_CELL_SIZE * ship.getShipLength(), GRID_CELL_SIZE);
+
+            // For drag & drop functionality.
+            setOnDragDetected(button);
+            setOnDragDone(button);
+
+            shipButtons.add(button);
         }
     }
 }
