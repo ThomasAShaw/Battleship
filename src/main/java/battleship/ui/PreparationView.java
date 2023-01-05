@@ -10,38 +10,38 @@ import javafx.scene.control.Label;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class PreparationView {
     // TODO: placing ships, shooting ships, and waiting.
     // TODO: unplaced ship list.
     // Specific to one player, for one game.
     private final Board playerBoard;
-    public static final double GRID_CELL_SIZE = 50;
+    public static final double GRID_CELL_SIZE = PlayerView.GRID_CELL_SIZE;
     private int shipsPlaced = 0;
     private Set<Coordinate> occupiedCoords;
     private final Map<Coordinate, StackPane> gridCells;
+    private boolean isHorizontal;
+    private BorderPane preparationLayout;
+    private List<Button> shipButtons;
 
     public PreparationView(Board playerBoard) {
         this.playerBoard = playerBoard;
         occupiedCoords = new HashSet<>();
         gridCells = new HashMap<>();
+        isHorizontal = true;
     }
 
     /**
      * Get the window for when a player is setting their ships' positions.
-     *
-     * @param isPlayerOne true if player one is playing currently, false for player two.
      * @return the window of the preparation view.
      */
     public Parent getPreparationView() {
-
-        BorderPane preparationLayout = new BorderPane();
+        preparationLayout = new BorderPane();
         GridPane activePlayerGrid = new GridPane();
-        VBox shipPlacingBox = new VBox();
+        VBox sideMenu = new VBox();
+        // Ships are horizontal on default.
+        VBox shipBox = new VBox();
 
         // Create active player board grid
         for (int i = 0; i < Board.DEFAULT_SIZE; i++) {
@@ -49,7 +49,7 @@ public class PreparationView {
             activePlayerGrid.getRowConstraints().add(new RowConstraints(50)); // TODO: may want to modify this.
         }
 
-        // Set letter and number labels
+        /* Set letter and number labels on side of player grid. */
         for (int i = 0; i < playerBoard.getXSize() + 1; i++) {
             Label letterLabel = new Label(i > 0 && i < 27 ? String.valueOf((char) (i + 64)) : "");
             Label numberLabel = new Label(i > 0 ? Integer.toString(i) : "");
@@ -66,7 +66,7 @@ public class PreparationView {
             activePlayerGrid.add(numberLabel, 0, i);
         }
 
-        // Add buttons to player board grid
+        /* Add buttons to player grid. */
         for (int y = 0; y < playerBoard.getYSize(); y++) {
             for (int x = 0; x < playerBoard.getXSize(); x++) {
                 // For dragging functionality
@@ -87,13 +87,15 @@ public class PreparationView {
             }
         }
 
-        // Ship placing box.
+        /* Ship placing box. */
+        // Horizontal ships on default.
         // Make ship buttons and properly size.
         Button carrier = new Button("Carrier");
         Button battleship = new Button("Battleship");
         Button cruiser = new Button("Cruiser");
         Button submarine = new Button("Submarine");
         Button destroyer = new Button("Destroyer");
+        shipButtons = List.of(carrier, battleship, cruiser, submarine, destroyer);
 
         carrier.setPrefSize(GRID_CELL_SIZE * 5, GRID_CELL_SIZE);
         battleship.setPrefSize(GRID_CELL_SIZE * 4, GRID_CELL_SIZE);
@@ -101,7 +103,7 @@ public class PreparationView {
         submarine.setPrefSize(GRID_CELL_SIZE * 3, GRID_CELL_SIZE);
         destroyer.setPrefSize(GRID_CELL_SIZE * 2, GRID_CELL_SIZE);
 
-        shipPlacingBox.getChildren().addAll(new Label("Ships to Place"), carrier, battleship, cruiser, submarine, destroyer);
+        shipBox.getChildren().addAll(new Label("Ships to Place"), carrier, battleship, cruiser, submarine, destroyer);
 
         // TODO: Handling dragging - look over this section.
         setOnDragDetected(carrier);
@@ -116,8 +118,12 @@ public class PreparationView {
         setOnDragDone(submarine);
         setOnDragDone(destroyer);
 
+        Button rotateButton = new Button("Rotate");
+        rotateButton.setOnAction((event) -> swapShipOrientation());
+        sideMenu.getChildren().addAll(rotateButton, shipBox);
+
         preparationLayout.setLeft(activePlayerGrid);
-        preparationLayout.setRight(shipPlacingBox);
+        preparationLayout.setRight(sideMenu);
 
         return preparationLayout;
     }
@@ -134,7 +140,12 @@ public class PreparationView {
 
             /* Put ship data in String format separated by newline. */
             ClipboardContent content = new ClipboardContent();
-            content.putString(sourceShip.getText() + "\n" + sourceShip.getWidth() / GRID_CELL_SIZE);
+            if (isHorizontal) {
+                content.putString(sourceShip.getText() + "\n" + sourceShip.getWidth() / GRID_CELL_SIZE);
+            } else {
+                content.putString(sourceShip.getText() + "\n" + sourceShip.getHeight() / GRID_CELL_SIZE);
+            }
+
             db.setContent(content);
 
             event.consume();
@@ -183,7 +194,6 @@ public class PreparationView {
             /* Add graphical cue to show if user can place ship at targetCell. */
             if (event.getGestureSource() != targetCell && event.getDragboard().hasString()) {
                 // FIXME: This is quite messy.
-                GridPane grid = (GridPane) targetCell.getParent();
                 int xCoord = GridPane.getColumnIndex(targetCell) - 1; // As left number column is at position 0.
                 int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
 
@@ -221,7 +231,6 @@ public class PreparationView {
         targetCell.setOnDragExited((DragEvent event) -> {
             /* When user moves mouse off cell, remove graphical cues. */
             // FIXME: This is quite messy.
-            GridPane grid = (GridPane) targetCell.getParent();
             int xCoord = GridPane.getColumnIndex(targetCell) - 1; // As left number column is at position 0.
             int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
             Dragboard db = event.getDragboard();
@@ -253,26 +262,36 @@ public class PreparationView {
 
             if (db.hasString()) {
                 /* Check to ensure target cell and any other required cells are not occupied. */
-                GridPane grid = (GridPane) targetCell.getParent();
                 int xCoord = GridPane.getColumnIndex(targetCell) - 1; // As left number column is at position 0.
                 int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
                 String[] shipData = db.getString().split("\n"); // Copied cell data is stored in String format, separated by newline.
 
-                // TODO: Currently only does rightwards.
                 if (canPlaceHere(new Coordinate(xCoord, yCoord), (int) Math.round(Double.parseDouble(shipData[1])))) {
                     shipsPlaced++;
 
                     /* Set all required cells to signify occupied by ship. */
-                    // TODO: Currently only does rightwards.
+                    // TODO: Currently only does rightwards and downwards - issue with coords...?
                     for (int i = 0; i < Double.parseDouble(shipData[1]); i++) {
-                        StackPane cell =  gridCells.get(new Coordinate(xCoord + i + 1, yCoord + 1));
-                        if (cell != null) {
-                            Button cellButton = (Button) cell.getChildren().get(cell.getChildren().size() - 1);
-                            cellButton.setText("S" + shipsPlaced);
-                            occupiedCoords.add(new Coordinate(xCoord + i, yCoord));
+                        if (isHorizontal) {
+                            StackPane cell =  gridCells.get(new Coordinate(xCoord + i + 1, yCoord + 1));
+                            if (cell != null) {
+                                Button cellButton = (Button) cell.getChildren().get(cell.getChildren().size() - 1);
+                                cellButton.setText("S" + shipsPlaced);
+                                occupiedCoords.add(new Coordinate(xCoord + i, yCoord));
+                            } else {
+                                throw new RuntimeException("Null cell.");
+                            }
                         } else {
-                            throw new RuntimeException("Null cell.");
+                            StackPane cell =  gridCells.get(new Coordinate(xCoord + 1, yCoord + i + 1));
+                            if (cell != null) {
+                                Button cellButton = (Button) cell.getChildren().get(cell.getChildren().size() - 1);
+                                cellButton.setText("S" + shipsPlaced);
+                                occupiedCoords.add(new Coordinate(xCoord, yCoord + i));
+                            } else {
+                                throw new RuntimeException("Null cell.");
+                            }
                         }
+
                     }
 
                     success = true;
@@ -285,7 +304,6 @@ public class PreparationView {
         });
     }
 
-    // TODO: Only supports rightwards placement.
     /**
      * Determine if ship placement is valid.
      * @param startCoordinate starting position of placement; not null.
@@ -305,9 +323,9 @@ public class PreparationView {
         return true;
     }
 
-    // TODO: Only supports rightwards placement.
+    // TODO: Only supports rightwards and downwards placement
     /**
-     * Get all the coordinates this ship will sit on.
+     * Get all the coordinates this ship will occupy.
      * @param startCoordinate starting position of placement; not null.
      * @param shipLength length of the ship.
      * @return list of the coordinates this ship will sit on.
@@ -317,10 +335,39 @@ public class PreparationView {
         int xCoord = startCoordinate.getX();
         int yCoord = startCoordinate.getY();
 
-        for (int i = 0; i < shipLength; i++) {
-            coordSet.add(new Coordinate(xCoord + i, yCoord));
+        if (isHorizontal) {
+            for (int i = 0; i < shipLength; i++) {
+                coordSet.add(new Coordinate(xCoord + i, yCoord));
+            }
+        } else {
+            for (int i = 0; i < shipLength; i++) {
+                coordSet.add(new Coordinate(xCoord, yCoord + i));
+            }
         }
 
         return coordSet;
+    }
+
+    // TODO: Fix button text.
+    private void swapShipOrientation() {
+        VBox sideMenu = (VBox) preparationLayout.getRight();
+        sideMenu.getChildren().remove(sideMenu.getChildren().size() - 1);
+        if (isHorizontal) {
+            isHorizontal = false;
+            HBox shipBoxVertical = new HBox();
+            for (Button ship : shipButtons) {
+                ship.setPrefSize(ship.getHeight(), ship.getWidth());
+                shipBoxVertical.getChildren().add(ship);
+            }
+            sideMenu.getChildren().add(shipBoxVertical);
+        } else {
+            isHorizontal = true;
+            VBox shipBoxHorizontal = new VBox();
+            for (Button ship : shipButtons) {
+                ship.setPrefSize(ship.getHeight(), ship.getWidth());
+                shipBoxHorizontal.getChildren().add(ship);
+            }
+            sideMenu.getChildren().add(shipBoxHorizontal);
+        }
     }
 }
