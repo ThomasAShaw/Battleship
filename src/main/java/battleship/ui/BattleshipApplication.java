@@ -38,7 +38,7 @@ public class BattleshipApplication extends Application {
         Pane firstLayout = getMainMenuView();
         PlayerView pv = new PlayerView(new Board());
 
-        Parent secondLayout = pv.getPreparationView(true);
+        Parent secondLayout = pv.getPlayerView();
 
         first.setOnAction((event) -> layout.setCenter(firstLayout));
         second.setOnAction((event) -> layout.setCenter(secondLayout));
