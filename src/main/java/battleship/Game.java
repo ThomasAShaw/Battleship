@@ -16,12 +16,15 @@ public class Game {
                     new Ship("Destroyer", new Coordinate(0,0), new Coordinate(0, 1)))
     );
 
+    public final List<GameEvent> gameHistory = new ArrayList<>();
+
     /**
      * Initialises a new Game object, with the default board size and ships.
      */
     public Game() {
         this.playerOne = new Board();
         this.playerTwo = new Board();
+        GameEvent.resetCount();
     }
 
     /**
@@ -29,7 +32,7 @@ public class Game {
      * @param firstPlayerTurn the player's turn it is to guess; true if first player, false otherwise.
      * @param guessCoordinate the coordinate to guess where a ship is; not null.
      * @return a String containing one of "HIT", "MISS", or "FAIL" and any appropriate details:
-     *         "HIT" attacking player, victim player, if the hit sunk a ship.
+     *         "HIT" attacking player, victim player, if the hit sunk a ship, if attacker won.
      *         "MISS" attacking player, victim player.
      *         "FAIL" reason guess failed.
      */
@@ -37,11 +40,13 @@ public class Game {
         gameStarted = true;
 
         if (gameOver) {
+            gameHistory.add(new GameEvent(GameEventType.FAIL, guessCoordinate, firstPlayerTurn, List.of("game over")));
             return "FAIL: Game over!";
         }
 
         if (firstPlayerTurn) {
             if (playerTwo.coordinateOutsideBoard(guessCoordinate)) {
+                gameHistory.add(new GameEvent(GameEventType.FAIL, guessCoordinate, firstPlayerTurn, List.of("outside board")));
                 return "FAIL: Guess outside P2 board.";
             }
 
@@ -49,18 +54,27 @@ public class Game {
             try {
                 if (playerTwo.guessLocation(guessCoordinate)) {
                     if (playerTwo.numShipsSunk() > numShipsSunk) {
+                        if (playerOne.allShipsSunk()) {
+                            gameHistory.add(new GameEvent(GameEventType.HIT, guessCoordinate, firstPlayerTurn, List.of("win")));
+                            return "HIT: P2 sunk P1's ship and won!";
+                        }
+                        gameHistory.add(new GameEvent(GameEventType.HIT, guessCoordinate, firstPlayerTurn, List.of("sunk")));
                         return "HIT: P1 sunk P2's ship!";
                     } else {
+                        gameHistory.add(new GameEvent(GameEventType.HIT, guessCoordinate, firstPlayerTurn, List.of("")));
                         return "HIT: P1 hit P2's ship!";
                     }
                 } else {
+                    gameHistory.add(new GameEvent(GameEventType.MISS, guessCoordinate, firstPlayerTurn, List.of("miss")));
                     return "MISS: P1 did not hit P2's ship.";
                 }
             } catch (CoordinateAlreadyGuessedException e) {
+                gameHistory.add(new GameEvent(GameEventType.FAIL, guessCoordinate, firstPlayerTurn, List.of("already guessed")));
                 return "FAIL: P1 already guessed this coordinate.";
             }
         } else {
             if (playerOne.coordinateOutsideBoard(guessCoordinate)) {
+                gameHistory.add(new GameEvent(GameEventType.FAIL, guessCoordinate, firstPlayerTurn, List.of("outside board")));
                 return "FAIL: Guess outside P1 board.";
             }
 
@@ -68,14 +82,22 @@ public class Game {
             try {
                 if (playerOne.guessLocation(guessCoordinate)) {
                     if (playerOne.numShipsSunk() > numShipsSunk) {
+                        if (playerOne.allShipsSunk()) {
+                            gameHistory.add(new GameEvent(GameEventType.HIT, guessCoordinate, firstPlayerTurn, List.of("win")));
+                            return "HIT: P2 sunk P1's ship and won!";
+                        }
+                        gameHistory.add(new GameEvent(GameEventType.HIT, guessCoordinate, firstPlayerTurn, List.of("sunk")));
                         return "HIT: P2 sunk P1's ship!";
                     } else {
+                        gameHistory.add(new GameEvent(GameEventType.HIT, guessCoordinate, firstPlayerTurn, List.of("")));
                         return "HIT: P2 hit P1's ship!";
                     }
                 } else {
+                    gameHistory.add(new GameEvent(GameEventType.MISS, guessCoordinate, firstPlayerTurn, List.of("")));
                     return "MISS: P2 not hit P1's ship.";
                 }
             } catch (CoordinateAlreadyGuessedException e) {
+                gameHistory.add(new GameEvent(GameEventType.FAIL, guessCoordinate, firstPlayerTurn, List.of("already guessed")));
                 return "FAIL: P2 already guessed this coordinate.";
             }
         }
@@ -205,5 +227,24 @@ public class Game {
             shipList.add(new Ship(s.getName(), new Coordinate(0, 0), new Coordinate(0, s.getShipLength() - 1)));
         }
         return shipList;
+    }
+
+    /**
+     * Get all new events that have happened in the game, past a certain point.
+     * @param startingEventNum event number which everything after will be returned.
+     * @return all events that happened after specified point.
+     */
+    public List<GameEvent> getNewEvents(int startingEventNum) {
+        List<GameEvent> newEvents = new ArrayList<>();
+
+        for (int i = startingEventNum; i < gameHistory.size(); i++) {
+            GameEvent event = gameHistory.get(i);
+
+            if (event.getEventType() != GameEventType.FAIL) {
+                newEvents.add(event);
+            }
+        }
+
+        return newEvents;
     }
 }

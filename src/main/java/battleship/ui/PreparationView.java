@@ -12,9 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
-
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class PreparationView {
     // Specific to one player, for one game.
@@ -49,8 +47,8 @@ public class PreparationView {
 
         /* Create player board grid. */
         for (int i = 0; i < Board.DEFAULT_SIZE; i++) {
-            activePlayerGrid.getColumnConstraints().add(new ColumnConstraints(50));
-            activePlayerGrid.getRowConstraints().add(new RowConstraints(50));
+            activePlayerGrid.getColumnConstraints().add(new ColumnConstraints(GRID_CELL_SIZE));
+            activePlayerGrid.getRowConstraints().add(new RowConstraints(GRID_CELL_SIZE));
         }
 
         /* Set letter and number labels on side of player grid. */

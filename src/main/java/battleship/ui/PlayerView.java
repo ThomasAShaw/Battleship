@@ -21,11 +21,13 @@ public class PlayerView {
     private PlayerState currentState;
     private boolean isGameOver = false;
     private boolean areShipsSet = false;
+    private final GameView gameView;
 
     public PlayerView(Game game, boolean isPlayerOne) {
         this.game = game;
         this.isPlayerOne = isPlayerOne;
         currentState = PlayerState.WAITING;
+        this.gameView = new GameView(game, isPlayerOne);
     }
 
     public void getPlayerView() {
@@ -47,6 +49,8 @@ public class PlayerView {
                     BattleshipApplication.activePane.setCenter(getWaitingView());
                     break;
                 case PLAYING:
+                    BattleshipApplication.activePane.setCenter(gameView.getGameView());
+                    currentState = PlayerState.WAITING;
                     break;
                 case END:
                     break;

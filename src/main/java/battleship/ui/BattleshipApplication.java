@@ -25,7 +25,7 @@ public class BattleshipApplication extends Application {
         activePane.setCenter(getMainMenuView());
 
         Scene scene = new Scene(activePane);
-
+        
         window.setScene(scene);
         window.show();
     }
