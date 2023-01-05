@@ -3,6 +3,7 @@ package battleship.ui;
 import battleship.Board;
 import battleship.Coordinate;
 import battleship.InvalidPlacementException;
+
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -11,17 +12,25 @@ import javafx.scene.control.Label;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 public class PlayerView {
     // TODO: placing ships, shooting ships, and waiting.
     // TODO: unplaced ship list.
+    // Specific to one player, for one game.
     private final Board playerBoard;
     public static final double GRID_CELL_SIZE = 50;
     private int shipsPlaced = 0;
-    private boolean[][] occupiedCoords;
+    private Set<Coordinate> occupiedCoords;
+    private final Map<Coordinate, StackPane> gridCells;
 
     public PlayerView(Board playerBoard) {
         this.playerBoard = playerBoard;
-        occupiedCoords = new boolean[playerBoard.getYSize()][playerBoard.getXSize()];
+        occupiedCoords = new HashSet<>();
+        gridCells = new HashMap<>();
     }
 
     public Parent getPlayerView() throws InvalidPlacementException {
@@ -80,6 +89,8 @@ public class PlayerView {
                 button.setStyle("-fx-background-radius: 0");
                 gridCell.getChildren().add(button);
                 activePlayerGrid.add(gridCell, x + 1, y + 1);
+                // Add one as letter and number cells take up first row and column, respectively.
+                gridCells.put(new Coordinate(x + 1, y + 1), gridCell);
             }
         }
 
@@ -118,43 +129,51 @@ public class PlayerView {
         return preparationLayout;
     }
 
+    /* Event handlers for preparation view. */
 
-    //TODO: Event handlers - clean these up.
-    public void setOnDragDetected(Button source)
-    {
-        source.setOnDragDetected((MouseEvent event) -> {
-            Dragboard db = source.startDragAndDrop(TransferMode.ANY);
+    /**
+     * Handle ship being dragged by user during preparation view.
+     * @param sourceShip ship button that user dragged from.
+     */
+    public void setOnDragDetected(Button sourceShip) {
+        sourceShip.setOnDragDetected((MouseEvent event) -> {
+            Dragboard db = sourceShip.startDragAndDrop(TransferMode.ANY);
 
-            /* put a string on dragboard */
+            /* Put ship data in String format separated by newline. */
             ClipboardContent content = new ClipboardContent();
-            content.putString(source.getText() + "\n" + source.getWidth() / GRID_CELL_SIZE);
+            content.putString(sourceShip.getText() + "\n" + sourceShip.getWidth() / GRID_CELL_SIZE);
             db.setContent(content);
 
             event.consume();
         });
     }
 
-    public void setOnDragDone(Button source)
-    {
-        source.setOnDragDone((DragEvent event) -> {
+    /**
+     * Handle user finishing DragEvent during preparation view.
+     * @param sourceShip ship button that user dragged from.
+     */
+    public void setOnDragDone(Button sourceShip) {
+        sourceShip.setOnDragDone((DragEvent event) -> {
             /* If the ship was successfully placed, clear the ship button from ships to place,
                and update the grid with the ship visible.
              */
             if (event.getTransferMode() == TransferMode.MOVE) {
-                source.setVisible(false);
-                source.setCancelButton(true);
+                sourceShip.setVisible(false);
+                sourceShip.setCancelButton(true);
             }
 
             event.consume();
         });
     }
 
-    //target event handlers
-    public void setOnDragOver(StackPane target)
-    {
-        target.setOnDragOver((DragEvent event) -> {
-            if (event.getGestureSource() != target
-                    && event.getDragboard().hasString()) {
+    /**
+     * Handle user dragging ship over targetCell during preparation view.
+     * @param targetCell the grid cell user dragged ship over.
+     */
+    public void setOnDragOver(StackPane targetCell) {
+        targetCell.setOnDragOver((DragEvent event) -> {
+            /* Accept only if not from same node, and DragBoard has data. */
+            if (event.getGestureSource() != targetCell && event.getDragboard().hasString()) {
                 event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
 
@@ -162,62 +181,104 @@ public class PlayerView {
         });
     }
 
-    public void setOnDragEntered(StackPane target)
-    {
-        target.setOnDragEntered((DragEvent event) -> {
-            if (event.getGestureSource() != target
-                    && event.getDragboard().hasString()) {
-                target.setStyle("-fx-background-color: green;");
+    /**
+     * Handle user moving mouse into targetCell while dragging ship in preparation view.
+     * @param targetCell the grid cell that user moved mouse into from while dragging.
+     */
+    public void setOnDragEntered(StackPane targetCell) {
+        targetCell.setOnDragEntered((DragEvent event) -> {
+            /* Add graphical cue to show if user can place ship at targetCell. */
+            if (event.getGestureSource() != targetCell && event.getDragboard().hasString()) {
+                // FIXME: This is quite messy.
+                GridPane grid = (GridPane) targetCell.getParent();
+                int xCoord = GridPane.getColumnIndex(targetCell) - 1; // As left number column is at position 0.
+                int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
+
+                Dragboard db = event.getDragboard();
+                String[] shipData = db.getString().split("\n");
+                int shipLength = (int) Math.round(Double.parseDouble(shipData[1]));
+
+                if (canPlaceHere(new Coordinate(xCoord, yCoord), shipLength)) {
+                    Set<Coordinate> gridCellCoords = getPotentialCoords(new Coordinate(xCoord + 1, yCoord + 1), shipLength);
+
+                    for (Coordinate cellCoord : gridCellCoords) {
+                        gridCells.get(cellCoord).getChildren().get(targetCell.getChildren().size() - 1).setStyle("-fx-background-color: green;");
+                    }
+                } else {
+                    Set<Coordinate> gridCellCoords = getPotentialCoords(new Coordinate(xCoord + 1, yCoord + 1), shipLength);
+                    for (Coordinate cellCoord : gridCellCoords) {
+                        StackPane gridCell = gridCells.get(cellCoord);
+
+                        if (gridCell != null) {
+                            gridCell.getChildren().get(targetCell.getChildren().size() - 1).setStyle("-fx-background-color: red;");
+                        }
+                    }
+                }
             }
 
             event.consume();
         });
     }
 
-    public void setOnDragExited(StackPane target)
-    {
-        target.setOnDragExited((DragEvent event) -> {
-            target.setStyle("-fx-background-color: transparent;");
+    /**
+     * Handle user moving mouse away from targetCell while dragging ship in preparation view.
+     * @param targetCell the grid cell that user moved mouse away from while dragging.
+     */
+    private void setOnDragExited(StackPane targetCell) {
+        targetCell.setOnDragExited((DragEvent event) -> {
+            /* When user moves mouse off cell, remove graphical cues. */
+            // FIXME: This is quite messy.
+            GridPane grid = (GridPane) targetCell.getParent();
+            int xCoord = GridPane.getColumnIndex(targetCell) - 1; // As left number column is at position 0.
+            int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
+            Dragboard db = event.getDragboard();
+            String[] shipData = db.getString().split("\n");
+            int shipLength = (int) Math.round(Double.parseDouble(shipData[1]));
+
+            Set<Coordinate> gridCellCoords = getPotentialCoords(new Coordinate(xCoord + 1, yCoord + 1), shipLength);
+            for (Coordinate cellCoord : gridCellCoords) {
+                StackPane gridCell = gridCells.get(cellCoord);
+
+                if (gridCell != null) {
+                    gridCell.getChildren().get(targetCell.getChildren().size() - 1).setStyle(null);
+                }
+            }
 
             event.consume();
         });
     }
 
-    public void setOnDragDropped(StackPane target)
-    {
-        target.setOnDragDropped((DragEvent event) -> {
+    /**
+     * Handle user letting go of dragged ship onto targetCell in preparation view.
+     * @param targetCell the grid cell that the user released the dragged ship onto.
+     */
+    private void setOnDragDropped(StackPane targetCell) {
+        targetCell.setOnDragDropped((DragEvent event) -> {
+            /* Check to ensure data is stored on DragBoard. */
             Dragboard db = event.getDragboard();
             boolean success = false;
 
-            // TODO: This is quite messy.
-            Button buttonAtTarget = (Button) target.getChildren().get(target.getChildren().size() - 1);
-            if (db.hasString() && buttonAtTarget.getText().isEmpty()) {
-                // Check to ensure nearby buttons are not occupied.
-                GridPane grid = (GridPane) target.getParent();
-                int xCoord = GridPane.getColumnIndex(target) - 1; // as the letter and numbers on the side add 1.
-                int yCoord = GridPane.getRowIndex(target) - 1;
-                String[] buttonData = db.getString().split("\n");
-                boolean canFit = true;
-                // Todo: currently only does rightwards
-                for (int i = 0; i < Math.round(Double.parseDouble(buttonData[1])); i++) {
-                    if (playerBoard.coordinateOutsideBoard(new Coordinate(xCoord + i, yCoord)) || occupiedCoords[yCoord][xCoord + i]) {
-                        canFit = false;
-                        break;
-                    }
-                }
+            if (db.hasString()) {
+                /* Check to ensure target cell and any other required cells are not occupied. */
+                GridPane grid = (GridPane) targetCell.getParent();
+                int xCoord = GridPane.getColumnIndex(targetCell) - 1; // As left number column is at position 0.
+                int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
+                String[] shipData = db.getString().split("\n"); // Copied cell data is stored in String format, separated by newline.
 
-                if (canFit) {
+                // TODO: Currently only does rightwards.
+                if (canPlaceHere(new Coordinate(xCoord, yCoord), (int) Math.round(Double.parseDouble(shipData[1])))) {
                     shipsPlaced++;
 
-                    // Communicate to nearby buttons
-                    for (int i = 0; i < Math.round(Double.parseDouble(buttonData[1])); i++) { // minus 1 as we already did the current square.
-                        StackPane cell = (StackPane) getNodeFromGridPane(grid, xCoord + i + 1, yCoord + 1);
+                    /* Set all required cells to signify occupied by ship. */
+                    // TODO: Currently only does rightwards.
+                    for (int i = 0; i < Double.parseDouble(shipData[1]); i++) {
+                        StackPane cell =  gridCells.get(new Coordinate(xCoord + i + 1, yCoord + 1));
                         if (cell != null) {
                             Button cellButton = (Button) cell.getChildren().get(cell.getChildren().size() - 1);
                             cellButton.setText("S" + shipsPlaced);
-                            occupiedCoords[yCoord][xCoord + i] = true;
+                            occupiedCoords.add(new Coordinate(xCoord + i, yCoord));
                         } else {
-                            throw new RuntimeException("oops");
+                            throw new RuntimeException("Null cell.");
                         }
                     }
 
@@ -225,13 +286,20 @@ public class PlayerView {
                 }
             }
 
+            /* Communicate if drag & drop was completed successfully. */
             event.setDropCompleted(success);
-
             event.consume();
         });
     }
 
-
+    /**
+     * Get a specific Node from a GridPane based on positioning.
+     * @param gridPane the gridPane to search for the node; not null.
+     * @param column the horizontal column of the node in the GridPane.
+     * @param row the vertical row of the node in the GridPane.
+     * @return the node at the position, null if given position is not on gridPane.
+     */
+    @Deprecated
     private Node getNodeFromGridPane(GridPane gridPane, int column, int row) {
         for (Node node : gridPane.getChildren()) {
             if (GridPane.getColumnIndex(node) == column && GridPane.getRowIndex(node) == row) {
@@ -240,5 +308,44 @@ public class PlayerView {
         }
 
         return null;
+    }
+
+    // TODO: Only supports rightwards placement.
+    /**
+     * Determine if ship placement is valid.
+     * @param startCoordinate starting position of placement; not null.
+     * @param shipLength length of the ship.
+     * @return true if ship placement is valid, false otherwise.
+     */
+    private boolean canPlaceHere(Coordinate startCoordinate, int shipLength) {
+        Set<Coordinate> coordSet = getPotentialCoords(startCoordinate, shipLength);
+
+        for (Coordinate coord : coordSet) {
+            if (playerBoard.coordinateOutsideBoard(coord)
+                    || occupiedCoords.contains(coord)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // TODO: Only supports rightwards placement.
+    /**
+     * Get all the coordinates this ship will sit on.
+     * @param startCoordinate starting position of placement; not null.
+     * @param shipLength length of the ship.
+     * @return list of the coordinates this ship will sit on.
+     */
+    private Set<Coordinate> getPotentialCoords(Coordinate startCoordinate, int shipLength) {
+        Set<Coordinate> coordSet = new HashSet<>();
+        int xCoord = startCoordinate.getX();
+        int yCoord = startCoordinate.getY();
+
+        for (int i = 0; i < shipLength; i++) {
+            coordSet.add(new Coordinate(xCoord + i, yCoord));
+        }
+
+        return coordSet;
     }
 }
