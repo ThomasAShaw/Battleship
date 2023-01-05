@@ -15,34 +15,16 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class BattleshipApplication extends Application {
+    private static Game currentGame;
+    public static boolean isPlayerOneTurn = true;
+    public static BorderPane activePane = new BorderPane();
+    private static PlayerView playerOne, playerTwo;
 
     @Override
     public void start(Stage window) throws Exception {
+        activePane.setCenter(getMainMenuView());
 
-        BorderPane layout = new BorderPane();
-
-        HBox menu = new HBox();
-
-        Button first = new Button("First View");
-        Button second = new Button("Second View");
-
-        menu.getChildren().addAll(first, second);
-
-        layout.setTop(menu);
-
-
-
-        Pane firstLayout = getMainMenuView();
-        PlayerView pv = new PlayerView(new Game(), true);
-
-        Parent secondLayout = pv.getPlayerView();
-
-        first.setOnAction((event) -> layout.setCenter(firstLayout));
-        second.setOnAction((event) -> layout.setCenter(secondLayout));
-
-        layout.setCenter(firstLayout);
-
-        Scene scene = new Scene(layout);
+        Scene scene = new Scene(activePane);
 
         window.setScene(scene);
         window.show();
@@ -79,11 +61,12 @@ public class BattleshipApplication extends Application {
         Button quitButton = new Button("Quit");
         newGameButton.setFont(new Font("Comic Sans MS", 15));
         quitButton.setFont(new Font("Comic Sans MS", 15));
-        quitButton.setOnAction((ActionEvent event) -> {
-            Platform.exit();
-        });
         newGameButton.setMinWidth(buttonWidth);
         quitButton.setMinWidth(buttonWidth);
+
+        newGameButton.setOnAction((event) -> beginNewGame());
+        quitButton.setOnAction((event) -> Platform.exit());
+
 
         VBox menu = new VBox();
         menu.setSpacing(10);
@@ -94,5 +77,21 @@ public class BattleshipApplication extends Application {
         layout.getChildren().add(menu);
 
         return layout;
+    }
+
+    private void beginNewGame() {
+        currentGame = new Game();
+        playerOne = new PlayerView(currentGame, true);
+        playerTwo = new PlayerView(currentGame, false);
+
+        switchPlayerScene();
+    }
+
+    public static void switchPlayerScene() {
+        if (isPlayerOneTurn) {
+            playerOne.getPlayerView();
+        } else {
+            playerTwo.getPlayerView();
+        }
     }
 }

@@ -4,14 +4,17 @@ import battleship.Board;
 import battleship.Coordinate;
 import battleship.Game;
 import battleship.Ship;
+import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class PreparationView {
     // Specific to one player, for one game.
@@ -108,6 +111,13 @@ public class PreparationView {
             if (success) {
                 statusLabel.setStyle("-fx-background-color: green;");
                 statusLabel.setText("Successfully confirmed placement.");
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                pause.setOnFinished(e ->{
+                    BattleshipApplication.isPlayerOneTurn = !isPlayerOne;
+                    BattleshipApplication.switchPlayerScene();
+                });
+                pause.play();
             } else {
                 statusLabel.setStyle("-fx-background-color: red;");
                 statusLabel.setText("Error confirming placement.");
