@@ -31,7 +31,7 @@ public class PreparationView {
     public PreparationView(Game game, boolean isPlayerOne) {
         this.game = game;
         this.isPlayerOne = isPlayerOne;
-        this.allShips = game.getShips(isPlayerOne);
+        this.allShips = game.getAllShips(isPlayerOne);
     }
 
     /**

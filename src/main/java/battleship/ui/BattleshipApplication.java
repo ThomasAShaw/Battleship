@@ -3,7 +3,6 @@ package battleship.ui;
 import battleship.Game;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -25,7 +24,7 @@ public class BattleshipApplication extends Application {
         activePane.setCenter(getMainMenuView());
 
         Scene scene = new Scene(activePane);
-        
+
         window.setScene(scene);
         window.show();
     }
@@ -45,7 +44,7 @@ public class BattleshipApplication extends Application {
     }
 
     // Main Menu Scene
-    private Pane getMainMenuView() {
+    private static Pane getMainMenuView() {
         Pane layout = new StackPane();
 
         // TODO: Finish text fonts
@@ -79,7 +78,7 @@ public class BattleshipApplication extends Application {
         return layout;
     }
 
-    private void beginNewGame() {
+    private static void beginNewGame() {
         currentGame = new Game();
         playerOne = new PlayerView(currentGame, true);
         playerTwo = new PlayerView(currentGame, false);
@@ -93,5 +92,19 @@ public class BattleshipApplication extends Application {
         } else {
             playerTwo.getPlayerView();
         }
+    }
+
+    // TODO: Implement this to look nicer.
+    public static void gameOverScreen() {
+        BorderPane gameOverPane = new BorderPane();
+        VBox endMenu = new VBox();
+        endMenu.setAlignment(Pos.CENTER);
+        Label winnerLabel = new Label(currentGame.checkWinner() + " Wins!");
+        Button mainMenuButton = new Button("Back to Main Menu");
+        mainMenuButton.setOnAction((event) -> BattleshipApplication.activePane.setCenter(BattleshipApplication.getMainMenuView()));
+
+        endMenu.getChildren().addAll(winnerLabel, mainMenuButton);
+        gameOverPane.setCenter(endMenu);
+        activePane.setCenter(gameOverPane);
     }
 }

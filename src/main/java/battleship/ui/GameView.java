@@ -1,11 +1,13 @@
 package battleship.ui;
 
 import battleship.*;
+import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,8 +20,9 @@ public class GameView {
     private int lastUpdatedEventNum = 0;
     private final Map<Coordinate, Button> activePlayerButtons = new HashMap<>();
     private final Map<Coordinate, Button> enemyPlayerButtons = new HashMap<>();
-    private GridPane activePlayerGrid;
-    private GridPane enemyPlayerGrid;
+    private GridPane activePlayerGrid = null;
+    private GridPane enemyPlayerGrid = null;
+    private boolean takeInput; // for disabling buttons, potentially change this.
     public static final double GRID_CELL_SIZE = PlayerView.GRID_CELL_SIZE;
 
     public GameView(Game game, boolean isPlayerOne) {
@@ -28,9 +31,14 @@ public class GameView {
     }
 
     public Parent getGameView() {
+        if (activePlayerGrid == null || enemyPlayerGrid == null) {
+            activePlayerGrid = getPlayerGrid(true);
+            enemyPlayerGrid = getPlayerGrid(false);
+        }
+        updatePlayerGrid();
+        takeInput = true;
+
         gameLayout = new BorderPane();
-        activePlayerGrid = getPlayerGrid(true);
-        enemyPlayerGrid = getPlayerGrid(false);
 
         HBox grids = new HBox();
         grids.getChildren().addAll(activePlayerGrid, enemyPlayerGrid);
@@ -84,18 +92,25 @@ public class GameView {
                     int finalX = x;
                     int finalY = y;
                     button.setOnAction((event) -> {
-                        game.guessLocation(isPlayerOne, new Coordinate(finalX, finalY));
-                        updatePlayerGrid(activePlayerGrid, enemyPlayerGrid);
-                        System.out.println(finalX + " " + finalY);
-                    });
+                        if (takeInput)
+                            handleGuess(button);});
                 }
             }
+        }
+
+        // Make sure all active player ships show up on their board...
+        int shipNum = 1;
+        for (Ship s : game.getPlacedShips(isPlayerOne)) {
+            for (Coordinate c : s.getCoordinates()) {
+                activePlayerButtons.get(new Coordinate(c.getX() + 1, c.getY() + 1)).setText("S" + shipNum);
+            }
+            shipNum++;
         }
 
         return playerGrid;
     }
 
-    private void updatePlayerGrid(GridPane activePlayerGrid, GridPane enemyPlayerGrid) {
+    private void updatePlayerGrid() {
         List<GameEvent> newEvents = game.getNewEvents(lastUpdatedEventNum);
         if (newEvents.size() > 0) {
             lastUpdatedEventNum = newEvents.get(newEvents.size() - 1).getEventNum();
@@ -123,10 +138,55 @@ public class GameView {
                     if (eventType == GameEventType.HIT) {
                         impactedButton.setText("X");
                     } else if (eventType == GameEventType.MISS) {
-                        impactedButton.setText("X");
+                        impactedButton.setText("O");
                     }
                 }
             }
         }
+    }
+
+    private boolean handleGuess(Button guessedButton) {
+        // Guess at that location...
+        int xCoord = GridPane.getColumnIndex(guessedButton) - 1; // As left number column is at position 0.
+        int yCoord = GridPane.getRowIndex(guessedButton) - 1; // As top letter row is at position 0.
+        String guessStatus = game.guessLocation(isPlayerOne, new Coordinate(xCoord, yCoord));
+
+        if (guessStatus.contains("HIT")) {
+            // Hit, so keep going unless win...
+            updatePlayerGrid();
+            if (guessStatus.contains("won")) {
+                handleEndGame();
+            }
+            return true;
+        } else if (guessStatus.contains("MISS")) {
+            // Missed, so switch player turn...
+            // TODO: Add in miss label
+            updatePlayerGrid();
+            takeInput = false;
+
+            PauseTransition pause = new PauseTransition(Duration.seconds(2));
+            pause.setOnFinished(e -> switchTurn());
+            pause.play();
+
+            return true;
+        } else {
+            // Failed, so display error code.
+            // TODO: Doesn't do anything right now.
+            System.out.println(guessStatus);
+            return false;
+        }
+    }
+
+    // TODO: Implement this.
+    private void handleEndGame() {
+        game.endGame();
+        PauseTransition pause = new PauseTransition(Duration.seconds(2));
+        pause.setOnFinished(e -> BattleshipApplication.gameOverScreen());
+        pause.play();
+    }
+
+    private void switchTurn() {
+        BattleshipApplication.isPlayerOneTurn = !isPlayerOne;
+        BattleshipApplication.switchPlayerScene();
     }
 }

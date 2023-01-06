@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Board {
     private final Coordinate[][] boardMatrix;
-    private final Set<Ship> shipManager = new HashSet<>();
+    private final List<Ship> shipManager = new ArrayList<>();
     public static final int DEFAULT_SIZE = 10;
 
     /**
@@ -166,5 +166,22 @@ public class Board {
      */
     public int getYSize() {
         return boardMatrix.length;
+    }
+
+    /**
+     * Get the location and info about all ships on this board.
+     * @return list of ships and their placement on the board, can be modified without mutating this board.
+     */
+    public List<Ship> getShips() {
+        List<Ship> shipList = new ArrayList<>();
+
+        for (Ship ship : shipManager) {
+            List<Coordinate> coords = ship.getCoordinates();
+            Coordinate startCoord = coords.get(0);
+            Coordinate endCoord = coords.get(coords.size() - 1);
+            shipList.add(new Ship(ship.getName(), new Coordinate(startCoord.getX(), startCoord.getY()), new Coordinate(endCoord.getX(), endCoord.getY())));
+        }
+
+        return shipList;
     }
 }

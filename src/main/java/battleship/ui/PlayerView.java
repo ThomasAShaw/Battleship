@@ -1,8 +1,6 @@
 package battleship.ui;
 
-import battleship.Board;
 import battleship.Game;
-import battleship.InvalidPlacementException;
 
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -12,8 +10,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 public class PlayerView {
-    // TODO: placing ships, shooting ships, and waiting.
-    // TODO: unplaced ship list.
     // Specific to one player, for one game.
     private final Game game;
     private final boolean isPlayerOne;
@@ -75,5 +71,4 @@ public class PlayerView {
         waitingLayout.setCenter(waitingMenu);
         return waitingLayout;
     }
-
 }

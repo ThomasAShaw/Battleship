@@ -54,9 +54,9 @@ public class Game {
             try {
                 if (playerTwo.guessLocation(guessCoordinate)) {
                     if (playerTwo.numShipsSunk() > numShipsSunk) {
-                        if (playerOne.allShipsSunk()) {
+                        if (playerTwo.allShipsSunk()) { // TODO: add as test, bug here.
                             gameHistory.add(new GameEvent(GameEventType.HIT, guessCoordinate, firstPlayerTurn, List.of("win")));
-                            return "HIT: P2 sunk P1's ship and won!";
+                            return "HIT: P1 sunk P2's ship and won!";
                         }
                         gameHistory.add(new GameEvent(GameEventType.HIT, guessCoordinate, firstPlayerTurn, List.of("sunk")));
                         return "HIT: P1 sunk P2's ship!";
@@ -215,18 +215,27 @@ public class Game {
     }
 
     /**
-     Get information on ships for a specified player.
+     Get information on all ships for a specified player, placed or unplaced.
      * @param isPlayerOne true if referring to first player, false for second player.
      * @return a list of ships for the specified player, but all begin at (0,0),
      *         are oriented downwards, and are not the same ships used by this game.
      */
-    public List<Ship> getShips(boolean isPlayerOne) {
+    public List<Ship> getAllShips(boolean isPlayerOne) {
         // FIXME: Currently only returns default ships.
         List<Ship> shipList = new ArrayList<>();
         for (Ship s : DEFAULT_SHIPS) {
             shipList.add(new Ship(s.getName(), new Coordinate(0, 0), new Coordinate(0, s.getShipLength() - 1)));
         }
         return shipList;
+    }
+
+    /**
+     * Get information on all placed ships for a specified player.
+     * @param isPlayerOne true if referring to first player, false for second player.
+     * @return a list of ships for the specified player, with their positions on the board.
+     */
+    public List<Ship> getPlacedShips (boolean isPlayerOne) {
+        return isPlayerOne ? playerOne.getShips() : playerTwo.getShips();
     }
 
     /**
