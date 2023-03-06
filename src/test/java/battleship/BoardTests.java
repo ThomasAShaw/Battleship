@@ -1,6 +1,7 @@
 package battleship;
 
 import org.junit.jupiter.api.Test;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardTests {
@@ -121,5 +122,89 @@ public class BoardTests {
 
         assertDoesNotThrow(() -> myBoard.guessLocation(new Coordinate(6, 6)));
         assertThrows(CoordinateAlreadyGuessedException.class, () -> myBoard.guessLocation(new Coordinate(6, 6)));
+    }
+
+    @Test
+    public void testGetCoordinates() {
+        Board testBoard = new Board();
+        Ship shipA = new Ship("Small", new Coordinate(0, 2), new Coordinate(2, 2));
+        Ship shipB = new Ship("Big", new Coordinate(5, 5), new Coordinate(9, 5, true, shipA));
+
+        try {
+            testBoard.setShip(shipA);
+            testBoard.setShip(shipB);
+
+            testBoard.guessLocation(new Coordinate(2,0));
+            testBoard.guessLocation(new Coordinate(5, 7));
+            testBoard.guessLocation(new Coordinate(2, 2));
+            testBoard.guessLocation(new Coordinate(1, 2, true, shipB));
+
+            assertEquals(testBoard.getCoordinate(2, 1), testBoard.getCoordinate(2,1));
+            assertEquals(testBoard.getCoordinate(5, 7), new Coordinate(5, 7, true, null));
+            assertEquals(testBoard.getCoordinate(9,9), new Coordinate(9, 9, false, null));
+            assertEquals(testBoard.getCoordinate(1,2), new Coordinate(1, 2, true, shipA));
+            assertThrows(InvalidPlacementException.class, () -> testBoard.getCoordinate(-6, 5));
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testBoardDimensions() {
+        Board testBoard = new Board();
+        assertEquals(testBoard.getXSize(), Board.DEFAULT_SIZE);
+        assertEquals(testBoard.getYSize(), Board.DEFAULT_SIZE);
+    }
+
+    @Test
+    public void testResetCoordinates() {
+        Board testBoard = new Board();
+        Ship shipA = new Ship("AaA", new Coordinate(9, 6), new Coordinate(6, 6));
+        Ship shipB = new Ship("bBb", new Coordinate(4, 5), new Coordinate(9, 5));
+
+        try {
+            testBoard.setShip(shipA);
+            testBoard.setShip(shipB);
+
+            testBoard.guessLocation(new Coordinate(9, 9));
+            testBoard.guessLocation(new Coordinate(4, 5));
+
+            testBoard.resetCoordinate(9, 6);
+            testBoard.resetCoordinate(9, 9);
+            testBoard.resetCoordinate(5, 4);
+
+            assertEquals(testBoard.getCoordinate(9,6), new Coordinate(9,6, false, null));
+            assertEquals(testBoard.getCoordinate(9, 9), new Coordinate(9,9));
+            assertEquals(testBoard.getCoordinate(4,5), new Coordinate(4,5, true, shipB));
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testGetShips() {
+        Board testBoard = new Board();
+        Ship shipA = new Ship("Aye Aye Captain!", new Coordinate(8, 1), new Coordinate(1, 1));
+        Ship shipB = new Ship("Pirate Booty Barge", new Coordinate(3, 6), new Coordinate(3, 5));
+        Ship shipC = new Ship("Cannon Carrier", new Coordinate(5, 5), new Coordinate(5,5));
+
+        try {
+            testBoard.setShip(shipA);
+            testBoard.setShip(shipB);
+            testBoard.setShip(shipC);
+
+            // TODO: Removing all coordinates of a ship should remove it from the board.
+            testBoard.resetCoordinate(5,5);
+            testBoard.guessLocation(new Coordinate(1,5));
+
+            List<Ship> shipList = testBoard.getShips();
+
+            assertTrue(shipList.contains(shipA));
+            assertTrue(shipList.contains(shipB));
+            assertTrue(shipList.contains(shipC));
+            assertTrue(shipList.contains(new Ship("Cannon Carrier", new Coordinate(5, 5), new Coordinate(5,5))));
+        } catch (Exception e) {
+            fail();
+        }
     }
 }

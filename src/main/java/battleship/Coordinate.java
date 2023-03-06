@@ -31,9 +31,7 @@ public class Coordinate {
         this.x = x;
         this.y = y;
         this.guessed = isGuessed;
-        if (occupyingShip != null) {
-            setShip(occupyingShip);
-        }
+        this.occupyingShip = occupyingShip;
     }
 
     /**
