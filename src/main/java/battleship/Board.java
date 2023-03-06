@@ -4,13 +4,14 @@ import java.util.*;
 
 public class Board {
     private final Coordinate[][] boardMatrix;
-    private final Set<Ship> shipManager = new HashSet<>();
+    private final List<Ship> shipManager = new ArrayList<>();
+    public static final int DEFAULT_SIZE = 10;
 
     /**
      * Initialises a new board object with the default 10 x 10 layout.
      */
     public Board() {
-        this.boardMatrix = new Coordinate[10][10];
+        this.boardMatrix = new Coordinate[DEFAULT_SIZE][DEFAULT_SIZE];
 
         /* Initialize boardMatrix. */
         for (int y = 0; y < boardMatrix.length; y++) {
@@ -22,7 +23,7 @@ public class Board {
 
     /**
      * Place a ship on the board.
-     * @param ship the battleship.Ship to place on the board; not null.
+     * @param ship the ship to place on the board; not null.
      * @throws InvalidPlacementException when attempting to place ship in invalid location.
      */
     public void setShip(Ship ship) throws InvalidPlacementException {
@@ -114,5 +115,73 @@ public class Board {
     public boolean coordinateOutsideBoard(Coordinate coordinate) {
         return coordinate.getY() >= boardMatrix.length || coordinate.getY() < 0
                 || coordinate.getX() >= boardMatrix[coordinate.getY()].length || coordinate.getX() < 0;
+    }
+
+    /**
+     Get information on a coordinate at the position (x,y) on the board.
+     * @param x horizontal position of coordinate on board.
+     * @param y vertical position of coordinate on board.
+     * @return a duplicated coordinate at the specified position, but does not have the same occupying ship.
+     * @throws InvalidPlacementException when attempting to access coordinate in invalid location.
+     */
+    public Coordinate getCoordinate(int x, int y) throws InvalidPlacementException {
+        if (coordinateOutsideBoard(new Coordinate(x, y))) {
+            throw new InvalidPlacementException("Coordinate outside of board area.");
+        }
+
+        /* Occupying ship is different for duplicatedCoordinate than boardCoordinate to avoid accidental modification. */
+        Coordinate boardCoordinate = boardMatrix[y][x];
+        Coordinate duplicatedCoordinate = new Coordinate(boardCoordinate.getX(), boardCoordinate.getY(), boardCoordinate.isGuessed(), null);
+
+        if (boardCoordinate.isOccupied()) {
+            duplicatedCoordinate.setShip(new Ship(boardCoordinate.getOccupyingShip().getName(), duplicatedCoordinate, duplicatedCoordinate));
+        }
+
+        return duplicatedCoordinate;
+    }
+
+    /**
+     * Reset a specified coordinate to default values.
+     * @param x horizontal position of coordinate on board.
+     * @param y vertical position of coordinate on board.
+     * @throws InvalidPlacementException when attempting to access coordinate in invalid location.
+     */
+    public void resetCoordinate(int x, int y) throws InvalidPlacementException {
+        if (coordinateOutsideBoard(new Coordinate(x, y))) {
+            throw new InvalidPlacementException("Coordinate outside of board area.");
+        }
+
+        boardMatrix[y][x] = new Coordinate(x, y);
+    }
+
+    /**
+     * @return horizontal size of board.
+     */
+    public int getXSize() {
+        return boardMatrix[0].length;
+    }
+
+    /**
+     * @return vertical size of board.
+     */
+    public int getYSize() {
+        return boardMatrix.length;
+    }
+
+    /**
+     * Get the location and info about all ships on this board.
+     * @return list of ships and their placement on the board, can be modified without mutating this board.
+     */
+    public List<Ship> getShips() {
+        List<Ship> shipList = new ArrayList<>();
+
+        for (Ship ship : shipManager) {
+            List<Coordinate> coords = ship.getCoordinates();
+            Coordinate startCoord = coords.get(0);
+            Coordinate endCoord = coords.get(coords.size() - 1);
+            shipList.add(new Ship(ship.getName(), new Coordinate(startCoord.getX(), startCoord.getY()), new Coordinate(endCoord.getX(), endCoord.getY())));
+        }
+
+        return shipList;
     }
 }

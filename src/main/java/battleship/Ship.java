@@ -71,7 +71,7 @@ public class Ship {
         if (coordinates == null) {
             throw new IllegalArgumentException("Coordinate(s) cannot be null.");
         } else if (coordinates.size() == 0) {
-            throw new IllegalArgumentException("Ship must occupy at least one coordinate");
+            throw new IllegalArgumentException("Ship must occupy at least one coordinate.");
         } else if (coordinates.size() > SIZE_LIMIT) {
             throw new IllegalArgumentException("Ship spans coordinates greater than size limit.");
         }
@@ -158,5 +158,12 @@ public class Ship {
     @Override
     public int hashCode() {
         return Objects.hash(occupiedCoordinates, name);
+    }
+
+    /**
+     * @return the length of the ship.
+     */
+    public int getShipLength() {
+        return occupiedCoordinates.size();
     }
 }
