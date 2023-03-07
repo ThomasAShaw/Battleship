@@ -3,7 +3,7 @@ package battleship.ui;
 import battleship.*;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
@@ -16,7 +16,6 @@ import java.util.Map;
 public class GameView {
     private final Game game;
     private final boolean isPlayerOne;
-    private BorderPane gameLayout;
     private int lastUpdatedEventNum = 0;
     private final Map<Coordinate, Button> activePlayerButtons = new HashMap<>();
     private final Map<Coordinate, Button> enemyPlayerButtons = new HashMap<>();
@@ -24,13 +23,15 @@ public class GameView {
     private GridPane enemyPlayerGrid = null;
     private boolean takeInput; // for disabling buttons, potentially change this.
     public static final double GRID_CELL_SIZE = PlayerView.GRID_CELL_SIZE;
+    private final BattleshipApplication app;
 
-    public GameView(Game game, boolean isPlayerOne) {
+    public GameView(BattleshipApplication app, Game game, boolean isPlayerOne) {
+        this.app = app;
         this.game = game;
         this.isPlayerOne = isPlayerOne;
     }
 
-    public Parent getGameView() {
+    public Scene getGameView() {
         if (activePlayerGrid == null || enemyPlayerGrid == null) {
             activePlayerGrid = getPlayerGrid(true);
             enemyPlayerGrid = getPlayerGrid(false);
@@ -38,13 +39,10 @@ public class GameView {
         updatePlayerGrid();
         takeInput = true;
 
-        gameLayout = new BorderPane();
-
         HBox grids = new HBox();
         grids.getChildren().addAll(activePlayerGrid, enemyPlayerGrid);
-        gameLayout.setCenter(grids);
 
-        return gameLayout;
+        return new Scene(grids);
     }
 
     private GridPane getPlayerGrid (boolean isCurrentPlayer) {
@@ -89,8 +87,6 @@ public class GameView {
                 } else {
                     enemyPlayerButtons.put(new Coordinate(x + 1, y + 1), button);
                     // On action, should count as a guess...
-                    int finalX = x;
-                    int finalY = y;
                     button.setOnAction((event) -> {
                         if (takeInput)
                             handleGuess(button);});
@@ -114,9 +110,6 @@ public class GameView {
         List<GameEvent> newEvents = game.getNewEvents(lastUpdatedEventNum);
         if (newEvents.size() > 0) {
             lastUpdatedEventNum = newEvents.get(newEvents.size() - 1).getEventNum();
-            // TODO: double check this...
-            boolean activePlayer = isPlayerOne;
-            boolean enemyPlayer = !isPlayerOne;
 
             for (GameEvent event : newEvents) {
                 Coordinate coordBoard = event.getCoordinate();
@@ -181,12 +174,11 @@ public class GameView {
     private void handleEndGame() {
         game.endGame();
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
-        pause.setOnFinished(e -> BattleshipApplication.gameOverScreen());
+        pause.setOnFinished(e -> app.gameOver());
         pause.play();
     }
 
     private void switchTurn() {
-        BattleshipApplication.isPlayerOneTurn = !isPlayerOne;
-        BattleshipApplication.switchPlayerScene();
+        app.switchPlayer();
     }
 }

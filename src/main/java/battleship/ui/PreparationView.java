@@ -6,7 +6,7 @@ import battleship.Game;
 import battleship.Ship;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.*;
@@ -27,8 +27,10 @@ public class PreparationView {
     private List<Button> shipButtons = new ArrayList<>(); // FIXME: potentially remove?
     private final boolean isPlayerOne;
     private Label statusLabel; // FIXME: potentially remove?
+    private final BattleshipApplication app;
 
-    public PreparationView(Game game, boolean isPlayerOne) {
+    public PreparationView(BattleshipApplication app, Game game, boolean isPlayerOne) {
+        this.app = app;
         this.game = game;
         this.isPlayerOne = isPlayerOne;
         this.allShips = game.getAllShips(isPlayerOne);
@@ -38,7 +40,7 @@ public class PreparationView {
      * Get the window for when a player is setting their ships' positions.
      * @return the window of the preparation view.
      */
-    public Parent getPreparationView() {
+    public Scene getPreparationView() {
         preparationLayout = new BorderPane();
         GridPane activePlayerGrid = new GridPane();
         VBox sideMenu = new VBox();
@@ -111,10 +113,7 @@ public class PreparationView {
                 statusLabel.setText("Successfully confirmed placement.");
 
                 PauseTransition pause = new PauseTransition(Duration.seconds(2));
-                pause.setOnFinished(e ->{
-                    BattleshipApplication.isPlayerOneTurn = !isPlayerOne;
-                    BattleshipApplication.switchPlayerScene();
-                });
+                pause.setOnFinished(e -> app.switchPlayer());
                 pause.play();
             } else {
                 statusLabel.setStyle("-fx-background-color: red;");
@@ -130,7 +129,7 @@ public class PreparationView {
         preparationLayout.setLeft(activePlayerGrid);
         preparationLayout.setRight(sideMenu);
 
-        return preparationLayout;
+        return new Scene(preparationLayout);
     }
 
     /* Event handlers for preparation view. */
