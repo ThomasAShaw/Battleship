@@ -129,7 +129,7 @@ public class PreparationView {
         preparationLayout.setLeft(activePlayerGrid);
         preparationLayout.setRight(sideMenu);
 
-        return new Scene(preparationLayout);
+        return new Scene(preparationLayout, 1000, 750);
     }
 
     /* Event handlers for preparation view. */

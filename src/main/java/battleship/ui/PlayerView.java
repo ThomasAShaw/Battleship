@@ -66,6 +66,6 @@ public class PlayerView {
 
         waitingMenu.getChildren().addAll(waitingLabel, privacyLabel, beginTurnButton);
 
-        return new Scene(waitingMenu);
+        return new Scene(waitingMenu, 1000, 750);
     }
 }

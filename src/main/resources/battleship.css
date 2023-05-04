@@ -1,0 +1,74 @@
+/* Main-Menu view */
+.main-menu {
+    -fx-background-color: linear-gradient(to bottom, #00D4FF, #0000AA, #0D0947);
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+/* Main-menu title */
+.title {
+    -fx-font-family: Arial, Sans-serif;
+    -font-weight: bold;
+    -fx-font-size: 50;
+    -fx-text-fill: white;
+}
+
+/* Main-menu subtitle */
+.subtitle {
+    -fx-font-family: Arial, Sans-serif;
+    -font-weight: bold;
+    -fx-font-size: 20;
+    -fx-text-fill: white;
+}
+
+/* Buttons */
+.button {
+    -fx-font-family: Arial, Sans-serif;
+    -fx-font-size: 15;
+    -fx-min-width: 150;
+    -fx-max-width: 150;
+    -fx-background-color: #1E90FF;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 5);
+}
+
+.button:hover, .back-to-main-menu-button:hover {
+    -fx-background-color: #6495ED;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 15, 0.5, 0, 7);
+}
+
+.button:pressed, .back-to-main-menu-button:pressed {
+    -fx-background-color: #4169E1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0.5, 0, 3);
+}
+
+/* Game-over screen */
+.end-menu {
+    -fx-background-color: linear-gradient(to bottom, #00D4FF, #0000AA, #0D0947);
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+.winner-label {
+    -fx-font-family: Arial, Sans-serif;
+    -fx-font-size: 36;
+    -fx-text-fill: white;
+}
+
+.winner-label {
+    -fx-font-family: Arial, Sans-serif;
+    -fx-font-size: 40;
+    -fx-text-fill: white;
+}
+
+/* Back-to-main-menu-button styles */
+.back-to-main-menu-button {
+    -fx-font-family: Arial, Sans-serif;
+    -fx-font-size: 20;
+    -fx-min-width: 200;
+    -fx-background-color: #1E90FF;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 5);
+}

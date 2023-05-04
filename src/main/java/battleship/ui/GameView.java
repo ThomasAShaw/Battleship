@@ -42,7 +42,7 @@ public class GameView {
         HBox grids = new HBox();
         grids.getChildren().addAll(activePlayerGrid, enemyPlayerGrid);
 
-        return new Scene(grids);
+        return new Scene(grids, 1150, 750);
     }
 
     private GridPane getPlayerGrid (boolean isCurrentPlayer) {
@@ -61,6 +61,7 @@ public class GameView {
             Label numberLabel = new Label(i > 0 ? Integer.toString(i) : "");
 
             letterLabel.setPrefWidth(GRID_CELL_SIZE);
+            letterLabel.setMinWidth(GRID_CELL_SIZE);
             letterLabel.setPrefHeight(GRID_CELL_SIZE);
             letterLabel.setAlignment(Pos.CENTER);
 
@@ -158,7 +159,7 @@ public class GameView {
             takeInput = false;
 
             PauseTransition pause = new PauseTransition(Duration.seconds(2));
-            pause.setOnFinished(e -> switchTurn());
+            pause.setOnFinished(e -> app.switchPlayer());
             pause.play();
 
             return true;
@@ -176,9 +177,5 @@ public class GameView {
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
         pause.setOnFinished(e -> app.gameOver());
         pause.play();
-    }
-
-    private void switchTurn() {
-        app.switchPlayer();
     }
 }

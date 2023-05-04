@@ -2,13 +2,10 @@ package battleship.ui;
 
 import battleship.Game;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class BattleshipApplication extends Application {
@@ -17,11 +14,17 @@ public class BattleshipApplication extends Application {
     private Scene activeScene;
     private PlayerView playerOne;
     private PlayerView playerTwo;
+    private MainMenuView mainMenu = new MainMenuView(this);
     private boolean isPlayerOneTurn;
 
     @Override
     public void start(Stage window) throws Exception {
         this.stage = window;
+
+        // Set the minimum window size.
+        this.stage.setMinWidth(300);
+        this.stage.setMinHeight(300);
+
         this.isPlayerOneTurn = true;
         this.activeScene = getMainMenuView();
         window.setScene(activeScene);
@@ -32,45 +35,15 @@ public class BattleshipApplication extends Application {
         launch(BattleshipApplication.class);
     }
 
-    // Main Menu Scene
+    /**
+     * Helper method for getting the main-menu view.
+     * @return the main-menu scene.
+     */
     private Scene getMainMenuView() {
-        VBox mainMenu = new VBox();
-        mainMenu.setAlignment(Pos.CENTER);
-        mainMenu.setSpacing(10);
-        mainMenu.setStyle("-fx-background-color: lightblue;");
-
-        Scene mainMenuScene = new Scene(mainMenu);
-
-        // Using comic sans as placeholder for now.
-        Label title = new Label("Battleship");
-        Label subtitle = new Label("Created By: Me");
-        title.setFont(new Font("Agency FB Bold", 40));
-        subtitle.setFont(new Font("Comic Sans MS", 15));
-        mainMenu.getChildren().addAll(title, subtitle);
-
-        // TODO: move this const somewhere better
-        final double buttonWidth = 100;
-        Button localMButton = new Button("Local Multiplayer");
-        Button optionsButton = new Button("Options");
-        Button quitButton = new Button("Quit Game");
-
-        localMButton.setFont(new Font("Comic Sans MS", 15));
-        optionsButton.setFont(new Font("Comic Sans MS", 15));
-        quitButton.setFont(new Font("Comic Sans MS", 15));
-
-        localMButton.setMinWidth(buttonWidth);
-        optionsButton.setMinWidth(buttonWidth);
-        quitButton.setMinWidth(buttonWidth);
-
-        localMButton.setOnAction((event) -> beginNewGame());
-        quitButton.setOnAction((event) -> Platform.exit());
-
-        mainMenu.getChildren().addAll(localMButton, optionsButton, quitButton);
-
-        return mainMenuScene;
+        return mainMenu.getMainMenuView();
     }
 
-    private void beginNewGame() {
+    void beginNewGame() {
         currentGame = new Game();
         playerOne = new PlayerView(this, currentGame, true);
         playerTwo = new PlayerView(this, currentGame, false);
@@ -91,13 +64,20 @@ public class BattleshipApplication extends Application {
     // TODO: Implement this to look nicer.
     public void gameOver() {
         VBox endMenu = new VBox();
-        endMenu.setAlignment(Pos.CENTER);
-        Label winnerLabel = new Label(currentGame.checkWinner() + " Wins!");
+        endMenu.getStyleClass().add("end-menu");
+
+        Label winnerLabel = new Label( " Wins!");
+        // FIXME: Label winnerLabel = new Label(currentGame.checkWinner() + " Wins!");
+        winnerLabel.getStyleClass().add("winner-label");
+
         Button mainMenuButton = new Button("Back to Main Menu");
+        mainMenuButton.getStyleClass().add("back-to-main-menu-button");
         mainMenuButton.setOnAction((event) -> switchScene(getMainMenuView()));
 
         endMenu.getChildren().addAll(winnerLabel, mainMenuButton);
-        Scene gameOverScene = new Scene(endMenu);
+        Scene gameOverScene = new Scene(endMenu, 1000, 750);
+        gameOverScene.getStylesheets().add(getClass().getResource("/battleship.css").toExternalForm());
+
         switchScene(gameOverScene);
     }
 }
