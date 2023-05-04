@@ -7,23 +7,23 @@
 
 /* Main-menu title */
 .title {
-    -fx-font-family: Arial, Sans-serif;
+    -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
     -font-weight: bold;
-    -fx-font-size: 50;
+    -fx-font-size: 75;
     -fx-text-fill: white;
 }
 
 /* Main-menu subtitle */
 .subtitle {
-    -fx-font-family: Arial, Sans-serif;
+    -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
     -font-weight: bold;
-    -fx-font-size: 20;
+    -fx-font-size: 30;
     -fx-text-fill: white;
 }
 
 /* Buttons */
 .button {
-    -fx-font-family: Arial, Sans-serif;
+    -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
     -fx-font-size: 15;
     -fx-min-width: 150;
     -fx-max-width: 150;
@@ -33,12 +33,12 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 5);
 }
 
-.button:hover, .back-to-main-menu-button:hover {
+.button:hover, .back-to-main-menu-button:hover, .begin-turn-button:hover {
     -fx-background-color: #6495ED;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 15, 0.5, 0, 7);
 }
 
-.button:pressed, .back-to-main-menu-button:pressed {
+.button:pressed, .back-to-main-menu-button:pressed, .begin-turn-button:pressed {
     -fx-background-color: #4169E1;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0.5, 0, 3);
 }
@@ -51,13 +51,7 @@
 }
 
 .winner-label {
-    -fx-font-family: Arial, Sans-serif;
-    -fx-font-size: 36;
-    -fx-text-fill: white;
-}
-
-.winner-label {
-    -fx-font-family: Arial, Sans-serif;
+    -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
     -fx-font-size: 40;
     -fx-text-fill: white;
 }
@@ -71,4 +65,37 @@
     -fx-text-fill: white;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 5);
+}
+
+/* Waiting view */
+.waiting-menu {
+    -fx-background-color: linear-gradient(to bottom, #00D4FF, #0000AA, #0D0947);
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+.waiting-label {
+    -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
+    -fx-font-size: 30;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0.5, 0, 5);
+}
+
+.privacy-label {
+    -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
+    -fx-font-size: 20;
+    -fx-text-fill: #F53838;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0.5, 0, 5);
+}
+
+.begin-turn-button {
+    -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
+    -fx-font-size: 20;
+    -fx-min-width: 150;
+    -fx-max-width: 150;
+    -fx-background-color: #1E90FF;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0.5, 0, 5);
 }
