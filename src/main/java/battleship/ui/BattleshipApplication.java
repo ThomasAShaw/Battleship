@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -21,7 +22,9 @@ public class BattleshipApplication extends Application {
     public void start(Stage window) throws Exception {
         this.stage = window;
 
-        // Set the minimum window size.
+        // Set window settings...
+        stage.getIcons().add(new Image("/boat.png"));
+        this.stage.setTitle("Battleship");
         this.stage.setMinWidth(300);
         this.stage.setMinHeight(300);
 

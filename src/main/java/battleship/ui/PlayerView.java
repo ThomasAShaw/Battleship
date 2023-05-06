@@ -71,6 +71,7 @@ public class PlayerView {
         beginTurnButton.setOnAction((event) -> app.switchScene(getPlayerView()));
 
         Button killTimeButton = new Button("Kill Time");
+        killTimeButton.getStyleClass().add("menu-button");
         killTimeButton.setOnAction((event) -> waitingMenu.setStyle("-fx-background-color: " + generateRandomColor()));
 
         waitingMenu.getChildren().addAll(waitingLabel, privacyLabel, beginTurnButton, killTimeButton);

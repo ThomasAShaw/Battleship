@@ -28,7 +28,7 @@ public class MainMenuView {
         mainMenu.getChildren().addAll(buttons);
 
         Scene mainMenuScene = new Scene(mainMenu, 1000, 750);
-        mainMenu.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/battleship.css")).toExternalForm());
+        mainMenuScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/battleship.css")).toExternalForm());
 
         return mainMenuScene;
     }
@@ -57,17 +57,17 @@ public class MainMenuView {
         List<Button> buttons = new ArrayList<>();
 
         Button localMultiplayerButton = new Button("Local Multiplayer");
-        localMultiplayerButton.getStyleClass().add("button");
+        localMultiplayerButton.getStyleClass().add("menu-button");
         localMultiplayerButton.setOnAction(event -> onLocalMultiplayerButtonClick());
         buttons.add(localMultiplayerButton);
 
         Button optionsButton = new Button("Options");
-        optionsButton.getStyleClass().add("button");
+        optionsButton.getStyleClass().add("menu-button");
         optionsButton.setOnAction(event -> onOptionsButtonClick());
         buttons.add(optionsButton);
 
         Button quitGameButton = new Button("Quit Game");
-        quitGameButton.getStyleClass().add("button");
+        quitGameButton.getStyleClass().add("menu-button");
         quitGameButton.setOnAction(event -> onQuitGameButtonClick());
         buttons.add(quitGameButton);
 
