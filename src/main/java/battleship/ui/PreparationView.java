@@ -5,6 +5,7 @@ import battleship.Coordinate;
 import battleship.Game;
 import battleship.Ship;
 import javafx.animation.PauseTransition;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -42,94 +43,25 @@ public class PreparationView {
      */
     public Scene getPreparationView() {
         preparationLayout = new BorderPane();
-        GridPane activePlayerGrid = new GridPane();
-        VBox sideMenu = new VBox();
-        /* Ships are horizontal on default. */
-        VBox shipBox = new VBox();
+        preparationLayout.getStyleClass().add("watery-background");
 
-        /* Create player board grid. */
-        for (int i = 0; i < Board.DEFAULT_SIZE; i++) {
-            activePlayerGrid.getColumnConstraints().add(new ColumnConstraints(GRID_CELL_SIZE));
-            activePlayerGrid.getRowConstraints().add(new RowConstraints(GRID_CELL_SIZE));
-        }
-
-        /* Set letter and number labels on side of player grid. */
-        for (int i = 0; i < game.getBoardWidth(isPlayerOne) + 1; i++) {
-            Label letterLabel = new Label(i > 0 && i < 27 ? String.valueOf((char) (i + 64)) : "");
-            Label numberLabel = new Label(i > 0 ? Integer.toString(i) : "");
-
-            letterLabel.setPrefWidth(GRID_CELL_SIZE);
-            letterLabel.setPrefHeight(GRID_CELL_SIZE);
-            letterLabel.setAlignment(Pos.CENTER);
-
-            numberLabel.setPrefWidth(GRID_CELL_SIZE);
-            numberLabel.setPrefHeight(GRID_CELL_SIZE);
-            numberLabel.setAlignment(Pos.CENTER);
-
-            activePlayerGrid.add(letterLabel, i, 0);
-            activePlayerGrid.add(numberLabel, 0, i);
-        }
-
-        /* Add buttons to player grid. */
-        for (int y = 0; y < game.getBoardHeight(isPlayerOne); y++) {
-            for (int x = 0; x < game.getBoardWidth(isPlayerOne); x++) {
-                /* For dragging functionality... */
-                StackPane gridCell = new StackPane();
-                gridCell.setPrefSize(GRID_CELL_SIZE, GRID_CELL_SIZE);
-                setOnDragOver(gridCell);
-                setOnDragEntered(gridCell);
-                setOnDragExited(gridCell);
-                setOnDragDropped(gridCell);
-
-                Button button = new Button();
-                button.setPrefSize(GRID_CELL_SIZE, GRID_CELL_SIZE);
-                button.setStyle("-fx-background-radius: 0");
-                gridCell.getChildren().add(button);
-                activePlayerGrid.add(gridCell, x + 1, y + 1);
-                /* Add one as letter and number cells take up first row and column, respectively. */
-                gridCells.put(new Coordinate(x + 1, y + 1), gridCell);
-            }
-        }
+        /* Active player grid. */
+        GridPane activePlayerGrid = initializePlayerGrid(Board.DEFAULT_SIZE);
+        activePlayerGrid.setPadding(new Insets(20));
 
         /* Ship placing box. */
-        setShipButtons();
+        VBox sideMenu = initializeSideMenu();
 
-        shipBox.getChildren().add(new Label("Ships to Place"));
-        shipBox.getChildren().addAll(shipButtons);
+        HBox mainContent = new HBox(20);
+        mainContent.setAlignment(Pos.CENTER);
+        mainContent.getChildren().addAll(activePlayerGrid, sideMenu);
 
-        HBox sideMenuButtons = new HBox();
-        Button rotateButton = new Button("Rotate");
-        Button resetButton = new Button("Reset");
-        Button confirmButton = new Button("Confirm");
-        statusLabel = new Label("");
+        preparationLayout.setCenter(mainContent);
 
-        rotateButton.setOnAction((event) -> swapShipOrientation());
-        resetButton.setOnAction((event) -> resetPlacement());
-        confirmButton.setOnAction((event) -> {
-            boolean success = confirmShipPlacement();
+        Scene preparationViewScene = new Scene(preparationLayout, 1000, 750);
+        preparationViewScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/battleship.css")).toExternalForm()); //FIXME
 
-            if (success) {
-                statusLabel.setStyle("-fx-background-color: green;");
-                statusLabel.setText("Successfully confirmed placement.");
-
-                PauseTransition pause = new PauseTransition(Duration.seconds(2));
-                pause.setOnFinished(e -> app.switchPlayer());
-                pause.play();
-            } else {
-                statusLabel.setStyle("-fx-background-color: red;");
-                statusLabel.setText("Error confirming placement.");
-            }
-        });
-
-        sideMenuButtons.getChildren().addAll(rotateButton, resetButton, confirmButton);
-
-
-        sideMenu.getChildren().addAll(sideMenuButtons, statusLabel, shipBox);
-
-        preparationLayout.setLeft(activePlayerGrid);
-        preparationLayout.setRight(sideMenu);
-
-        return new Scene(preparationLayout, 1000, 750);
+        return preparationViewScene;
     }
 
     /* Event handlers for preparation view. */
@@ -138,16 +70,16 @@ public class PreparationView {
      * Handle ship being dragged by user during preparation view.
      * @param sourceShip ship button that user dragged from.
      */
-    public void setOnDragDetected(Button sourceShip) {
+    private void setOnDragDetected(Button sourceShip) {
         sourceShip.setOnDragDetected((MouseEvent event) -> {
             Dragboard db = sourceShip.startDragAndDrop(TransferMode.ANY);
 
             /* Put ship data in String format separated by newline. */
             ClipboardContent content = new ClipboardContent();
             if (isHorizontal) {
-                content.putString(sourceShip.getText() + "\n" + sourceShip.getWidth() / GRID_CELL_SIZE);
+                content.putString(sourceShip.getText() + "!" + sourceShip.getWidth() / GRID_CELL_SIZE);
             } else {
-                content.putString(sourceShip.getText() + "\n" + sourceShip.getHeight() / GRID_CELL_SIZE);
+                content.putString(sourceShip.getText() + "!" + sourceShip.getHeight() / GRID_CELL_SIZE);
             }
 
             db.setContent(content);
@@ -160,7 +92,7 @@ public class PreparationView {
      * Handle user finishing DragEvent during preparation view.
      * @param sourceShip ship button that user dragged from.
      */
-    public void setOnDragDone(Button sourceShip) {
+    private void setOnDragDone(Button sourceShip) {
         sourceShip.setOnDragDone((DragEvent event) -> {
             /* If the ship was successfully placed, clear the ship button from ships to place,
                and update the grid with the ship visible.
@@ -178,7 +110,7 @@ public class PreparationView {
      * Handle user dragging ship over targetCell during preparation view.
      * @param targetCell the grid cell user dragged ship over.
      */
-    public void setOnDragOver(StackPane targetCell) {
+    private void setOnDragOver(StackPane targetCell) {
         targetCell.setOnDragOver((DragEvent event) -> {
             /* Accept only if not from same node, and DragBoard has data. */
             if (event.getGestureSource() != targetCell && event.getDragboard().hasString()) {
@@ -193,7 +125,7 @@ public class PreparationView {
      * Handle user moving mouse into targetCell while dragging ship in preparation view.
      * @param targetCell the grid cell that user moved mouse into from while dragging.
      */
-    public void setOnDragEntered(StackPane targetCell) {
+    private void setOnDragEntered(StackPane targetCell) {
         targetCell.setOnDragEntered((DragEvent event) -> {
             /* Add graphical cue to show if user can place ship at targetCell. */
             if (event.getGestureSource() != targetCell && event.getDragboard().hasString()) {
@@ -202,14 +134,16 @@ public class PreparationView {
                 int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
 
                 Dragboard db = event.getDragboard();
-                String[] shipData = db.getString().split("\n");
+                String[] shipData = db.getString().split("!");
                 int shipLength = (int) Math.round(Double.parseDouble(shipData[1]));
 
                 if (canPlaceHere(new Coordinate(xCoord, yCoord), shipLength)) {
                     Set<Coordinate> gridCellCoords = getPotentialCoords(new Coordinate(xCoord + 1, yCoord + 1), shipLength);
 
                     for (Coordinate cellCoord : gridCellCoords) {
-                        gridCells.get(cellCoord).getChildren().get(targetCell.getChildren().size() - 1).setStyle("-fx-background-color: green;");
+                        // Add visual cue for valid placement.
+                        gridCells.get(cellCoord).getChildren().get(targetCell.getChildren().size() - 1)
+                                .setStyle("-fx-background-color: rgba(0, 255, 0, 0.5); -fx-border-color: rgba(0, 255, 0, 0.5); -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.4), 5, 0.0, 3, 3); -fx-border-width: 2px;");
                     }
                 } else {
                     Set<Coordinate> gridCellCoords = getPotentialCoords(new Coordinate(xCoord + 1, yCoord + 1), shipLength);
@@ -217,7 +151,9 @@ public class PreparationView {
                         StackPane gridCell = gridCells.get(cellCoord);
 
                         if (gridCell != null) {
-                            gridCell.getChildren().get(targetCell.getChildren().size() - 1).setStyle("-fx-background-color: red;");
+                            // Add visual cue for invalid placement.
+                            gridCells.get(cellCoord).getChildren().get(targetCell.getChildren().size() - 1)
+                                    .setStyle("-fx-background-color: rgba(255, 0, 0, 0.5); -fx-border-color: rgba(255, 0, 0, 0.5); -fx-border-width: 2px;");
                         }
                     }
                 }
@@ -238,7 +174,7 @@ public class PreparationView {
             int xCoord = GridPane.getColumnIndex(targetCell) - 1; // As left number column is at position 0.
             int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
             Dragboard db = event.getDragboard();
-            String[] shipData = db.getString().split("\n");
+            String[] shipData = db.getString().split("!");
             int shipLength = (int) Math.round(Double.parseDouble(shipData[1]));
 
             Set<Coordinate> gridCellCoords = getPotentialCoords(new Coordinate(xCoord + 1, yCoord + 1), shipLength);
@@ -268,7 +204,7 @@ public class PreparationView {
                 /* Check to ensure target cell and any other required cells are not occupied. */
                 int xCoord = GridPane.getColumnIndex(targetCell) - 1; // As left number column is at position 0.
                 int yCoord = GridPane.getRowIndex(targetCell) - 1; // As top letter row is at position 0.
-                String[] shipData = db.getString().split("\n"); // Copied cell data is stored in String format, separated by newline.
+                String[] shipData = db.getString().split("!"); // Copied cell data is stored in String format, separated by exclamation mark.
                 int shipLength = (int) Double.parseDouble(shipData[1]);
 
                 if (canPlaceHere(new Coordinate(xCoord, yCoord), shipLength)) {
@@ -371,21 +307,30 @@ public class PreparationView {
 
     // TODO: Fix button text.
     private void swapShipOrientation() {
-        VBox sideMenu = (VBox) preparationLayout.getRight();
+        HBox mainContent = (HBox) preparationLayout.getCenter();
+        VBox sideMenu = (VBox) mainContent.getChildren().get((mainContent.getChildren().size() - 1));
         sideMenu.getChildren().remove(sideMenu.getChildren().size() - 1);
         if (isHorizontal) {
             isHorizontal = false;
             HBox shipBoxVertical = new HBox();
+            shipBoxVertical.getStyleClass().add("ship-box");
             for (Button ship : shipButtons) {
                 ship.setPrefSize(ship.getHeight(), ship.getWidth());
+                ship.getStyleClass().remove(ship.getStyleClass().size() - 1);
+                ship.getStyleClass().add("side-menu-ship-button-vertical");
+                setButtonText(ship, isHorizontal);
                 shipBoxVertical.getChildren().add(ship);
             }
             sideMenu.getChildren().add(shipBoxVertical);
         } else {
             isHorizontal = true;
             VBox shipBoxHorizontal = new VBox();
+            shipBoxHorizontal.getStyleClass().add("ship-box");
             for (Button ship : shipButtons) {
                 ship.setPrefSize(ship.getHeight(), ship.getWidth());
+                ship.getStyleClass().remove(ship.getStyleClass().size() - 1);
+                ship.getStyleClass().add("side-menu-ship-button-horizontal");
+                setButtonText(ship, isHorizontal);
                 shipBoxHorizontal.getChildren().add(ship);
             }
             sideMenu.getChildren().add(shipBoxHorizontal);
@@ -411,11 +356,10 @@ public class PreparationView {
         statusLabel.setText("");
         statusLabel.setStyle(null);
 
-        VBox sideMenu = (VBox) preparationLayout.getRight();
+        HBox mainContent = (HBox) preparationLayout.getCenter();
+        VBox sideMenu = (VBox) mainContent.getChildren().get(mainContent.getChildren().size() - 1);
         sideMenu.getChildren().remove(sideMenu.getChildren().size() - 1);
-        VBox shipBox = new VBox();
-        shipBox.getChildren().add(new Label("Ships to Place"));
-        shipBox.getChildren().addAll(shipButtons);
+        Pane shipBox = getShipBox();
         sideMenu.getChildren().add(shipBox);
     }
 
@@ -451,8 +395,195 @@ public class PreparationView {
             // For drag & drop functionality.
             setOnDragDetected(button);
             setOnDragDone(button);
+            double initialFontSize = calculateFontSize(button, button.getText());
+            button.setStyle("-fx-font-size: " + initialFontSize + "px;");
 
+            // Update the font size when the button is resized
+            button.widthProperty().addListener((obs, oldVal, newVal) -> {
+                double newFontSize = calculateFontSize(button, button.getText());
+                button.setStyle("-fx-font-size: " + newFontSize + "px;");
+            });
+
+            button.heightProperty().addListener((obs, oldVal, newVal) -> {
+                double newFontSize = calculateFontSize(button, button.getText());
+                button.setStyle("-fx-font-size: " + newFontSize + "px;");
+            });
+
+            button.getStyleClass().add("side-menu-ship-button-horizontal");
             shipButtons.add(button);
         }
+    }
+
+    /**
+     * Helper for creating the active player grid.
+     * @param boardSize number of grid cells horizontally and vertically the board will be.
+     * @return a VBox representing the physical grid for the player.
+     */
+    private GridPane initializePlayerGrid(int boardSize) {
+        GridPane activePlayerGrid = new GridPane();
+
+        /* Create player board grid. */
+        for (int i = 0; i < boardSize; i++) {
+            activePlayerGrid.getColumnConstraints().add(new ColumnConstraints(GRID_CELL_SIZE));
+            activePlayerGrid.getRowConstraints().add(new RowConstraints(GRID_CELL_SIZE));
+        }
+
+        /* Set letter and number labels on side of player grid. */
+        for (int i = 0; i < game.getBoardWidth(isPlayerOne) + 1; i++) {
+            Label letterLabel = new Label(i > 0 && i < 27 ? String.valueOf((char) (i + 64)) : "*");
+            Label numberLabel = new Label(i > 0 ? Integer.toString(i) : "*");
+            letterLabel.getStyleClass().add("grid-label");
+            numberLabel.getStyleClass().add("grid-label");
+
+            letterLabel.setPrefWidth(GRID_CELL_SIZE);
+            letterLabel.setPrefHeight(GRID_CELL_SIZE);
+            letterLabel.setAlignment(Pos.CENTER);
+
+            numberLabel.setPrefWidth(GRID_CELL_SIZE);
+            numberLabel.setPrefHeight(GRID_CELL_SIZE);
+            numberLabel.setAlignment(Pos.CENTER);
+
+            if (i != 0) {
+                activePlayerGrid.add(letterLabel, i, 0);
+                activePlayerGrid.add(numberLabel, 0, i);
+            } else {
+                activePlayerGrid.add(letterLabel, i, i);
+            }
+        }
+
+        /* Add buttons to player grid. */
+        for (int y = 0; y < game.getBoardHeight(isPlayerOne); y++) {
+            for (int x = 0; x < game.getBoardWidth(isPlayerOne); x++) {
+                /* For dragging functionality... */
+                StackPane gridCell = new StackPane();
+                gridCell.setPrefSize(GRID_CELL_SIZE, GRID_CELL_SIZE);
+                setOnDragOver(gridCell);
+                setOnDragEntered(gridCell);
+                setOnDragExited(gridCell);
+                setOnDragDropped(gridCell);
+
+                Button button = new Button();
+                button.setPrefSize(GRID_CELL_SIZE, GRID_CELL_SIZE);
+                button.setStyle("-fx-background-radius: 0");
+                button.getStyleClass().add("grid-button");
+                gridCell.getChildren().add(button);
+                activePlayerGrid.add(gridCell, x + 1, y + 1);
+                /* Add one as letter and number cells take up first row and column, respectively. */
+                gridCells.put(new Coordinate(x + 1, y + 1), gridCell);
+            }
+        }
+
+        return activePlayerGrid;
+    }
+
+    /**
+     * Helper for creating the side-menu.
+     * @return a VBox containing the finished side-menu.
+     */
+    private VBox initializeSideMenu() {
+        VBox sideMenu = new VBox();
+        sideMenu.getStyleClass().add("side-menu");
+
+        Pane shipBox = getShipBox(); // Ships are horizontal on default.
+
+        HBox sideMenuButtons = new HBox(10);
+        sideMenuButtons.setAlignment(Pos.CENTER);
+
+        Button rotateButton = new Button("Rotate");
+        rotateButton.getStyleClass().add("side-menu-button");
+        Button resetButton = new Button("Reset");
+        resetButton.getStyleClass().add("side-menu-button");
+        Button confirmButton = new Button("Confirm");
+        confirmButton.getStyleClass().add("side-menu-button");
+
+        statusLabel = new Label("");
+        statusLabel.getStyleClass().add("side-menu-label");
+
+        rotateButton.setOnAction((event) -> swapShipOrientation());
+        resetButton.setOnAction((event) -> resetPlacement());
+        confirmButton.setOnAction((event) -> {
+            boolean success = confirmShipPlacement();
+
+            if (success) {
+                statusLabel.setStyle("-fx-background-color: green;");
+                statusLabel.setText("Successfully confirmed placement.");
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                pause.setOnFinished(e -> app.switchPlayer());
+                pause.play();
+            } else {
+                statusLabel.setStyle("-fx-background-color: red;");
+                statusLabel.setText("Error confirming placement.");
+            }
+        });
+
+        sideMenuButtons.getChildren().addAll(rotateButton, resetButton, confirmButton);
+
+        sideMenu.getChildren().addAll(sideMenuButtons, statusLabel, shipBox);
+
+        return sideMenu;
+    }
+
+    /**
+     * Get a new ShipBox, when resetting the board. Uses default horizontal ship position.
+     * @return new ShipBox setup and ready for use.
+     */
+    private Pane getShipBox() {
+        Pane shipBox = new VBox(10);
+        shipBox.getStyleClass().add("ship-box");
+        setShipButtons();
+
+        shipBox.getChildren().addAll(shipButtons);
+
+        return shipBox;
+    }
+
+    private void setButtonText(Button button, boolean isHorizontal) {
+        if (isHorizontal) {
+            String horizontalText = button.getText();
+            button.setText(horizontalText.replace("\n", ""));
+        } else {
+            String buttonText = button.getText();
+            StringBuilder verticalText = new StringBuilder();
+            for (int i = 0; i < buttonText.length(); i++) {
+                verticalText.append(buttonText.charAt(i));
+                if (i < buttonText.length() - 1) {
+                    verticalText.append('\n');
+                }
+            }
+            button.setText(verticalText.toString());
+        }
+    }
+
+    /**
+     * Helper for getting the size the ship button font should be.
+     * @param button to check.
+     * @param text that is displayed on button.
+     * @return appropriate font size.
+     */
+    private double calculateFontSize(Button button, String text) {
+        double buttonWidth = button.getWidth();
+        double buttonHeight = button.getHeight();
+
+        double maxFontSizeWidth;
+        double maxFontSizeHeight;
+
+        if (!isHorizontal) {
+            maxFontSizeWidth = buttonWidth;
+            maxFontSizeHeight = buttonHeight / text.length();
+        } else {
+            maxFontSizeWidth = buttonWidth / text.length();
+            maxFontSizeHeight = buttonHeight;
+        }
+
+        double fontSize = Math.min(maxFontSizeWidth, maxFontSizeHeight);
+
+        double minFontSize = 4;
+        double maxFontSize = 20;
+
+        fontSize = Math.max(minFontSize, fontSize);
+        fontSize = Math.min(maxFontSize, fontSize);
+
+        return fontSize;
     }
 }

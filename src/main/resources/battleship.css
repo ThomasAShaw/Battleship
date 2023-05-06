@@ -101,10 +101,9 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0.5, 0, 5);
 }
 
-/* Preparation view styles. */
+/* Preparation view styles. Everything above this line is good. */
 /* Side-menu */
 .side-menu {
-    -fx-background-color: grey;
     -fx-alignment: top-center;
     -fx-spacing: 10;
     -fx-padding: 20;
@@ -144,38 +143,77 @@
     -fix-pref-height: 50;
     -fx-min-width: 50;
     -fx-max-width: 50;
-    -fx-background-color: #1E90FF;
-    -fx-text-fill: white;
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(30,144,255,0.7) 0%, rgba(30,144,255,0.7) 100%),
+        linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 100%);
+    -fx-background-insets: 0, 1;
     -fx-background-radius: 0;
+    -fx-border-color: rgba(30,144,255,0.8);
+    -fx-border-width: 1;
+    -fx-border-radius: 0;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.4), 5, 0.0, 3, 3);
+}
+
+.grid-button:hover {
+    -fx-background-color: #3da5ff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0.5, 0, 2);
 }
 
 .side-menu-ship-button-horizontal {
     -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
     -fx-font-size: 10;
-    -fx-background-color: black;
+    -fx-background-color: linear-gradient(to bottom, #1e90ff, #1c86ee);
     -fx-text-fill: white;
     -fx-shape: "M0 0 L0 20 L-20 20 L-25 10 L-20 0 Z";
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 5);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 1px;
 }
 
 .side-menu-ship-button-vertical {
     -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
     -fx-font-size: 10;
-    -fx-background-color: black;
+    -fx-background-color: linear-gradient(to bottom, #1e90ff, #1c86ee);
     -fx-text-fill: white;
     -fx-shape: "M0 0 L0 20 L-10 25 L-20 20 L-20 0 Z";
     -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 5);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 1px;
 }
 
-.ship-box { /* FIXME. */
-    -fx-background-color: grey;
+.ship-box {
+    -fx-background-color: rgba(60, 60, 60, 0.8);
     -fx-alignment: center;
     -fx-spacing: 10;
     -fx-padding: 20;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 5);
 }
 
-.grid-label { /* Fix this. */
+.grid-label {
     -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
     -fx-font-size: 20;
-    -fx-text-fill: black;
+    -fx-text-fill: white;
     -fx-alignment: center;
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(30,144,255,0.7) 0%, rgba(30,144,255,0.7) 100%),
+        linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 100%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 0;
+    -fx-border-color: rgba(30,144,255,0.8);
+    -fx-border-width: 1;
+    -fx-border-radius: 0;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.4), 5, 0.0, 3, 3);
+}
+
+.watery-background {
+    -fx-background-color: linear-gradient(to bottom, #0077be, #019fd3);
+    -fx-min-width: 100%;
+    -fx-min-height: 100%;
+    -fx-max-width: Infinity;
+    -fx-max-height: Infinity;
+    -fx-background-size: 300% 300%;
 }
