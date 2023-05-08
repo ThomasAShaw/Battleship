@@ -24,10 +24,10 @@ public class PreparationView {
     private final Set<Coordinate> occupiedCoords = new HashSet<>();
     private final Map<Coordinate, StackPane> gridCells = new HashMap<>();
     private boolean isHorizontal = true;
-    private BorderPane preparationLayout; // FIXME: potentially remove?
-    private List<Button> shipButtons = new ArrayList<>(); // FIXME: potentially remove?
+    private BorderPane preparationLayout;
+    private List<Button> shipButtons = new ArrayList<>();
     private final boolean isPlayerOne;
-    private Label statusLabel; // FIXME: potentially remove?
+    private Label statusLabel;
     private final BattleshipApplication app;
 
     public PreparationView(BattleshipApplication app, Game game, boolean isPlayerOne) {
@@ -213,24 +213,22 @@ public class PreparationView {
                     /* Set all required cells to signify occupied by ship. */
                     // TODO: Currently only does rightwards and downwards - issue with coords...?
                     for (int i = 0; i < shipLength; i++) {
+                        StackPane cell;
+                        Button cellButton;
+
                         if (isHorizontal) {
-                            StackPane cell =  gridCells.get(new Coordinate(xCoord + i + 1, yCoord + 1));
-                            if (cell != null) {
-                                Button cellButton = (Button) cell.getChildren().get(cell.getChildren().size() - 1);
-                                cellButton.setText("S" + shipsPlaced);
-                                occupiedCoords.add(new Coordinate(xCoord + i, yCoord));
-                            } else {
-                                throw new RuntimeException("Null cell.");
-                            }
+                            cell =  gridCells.get(new Coordinate(xCoord + i + 1, yCoord + 1));
                         } else {
-                            StackPane cell =  gridCells.get(new Coordinate(xCoord + 1, yCoord + i + 1));
-                            if (cell != null) {
-                                Button cellButton = (Button) cell.getChildren().get(cell.getChildren().size() - 1);
-                                cellButton.setText("S" + shipsPlaced);
-                                occupiedCoords.add(new Coordinate(xCoord, yCoord + i));
-                            } else {
-                                throw new RuntimeException("Null cell.");
-                            }
+                            cell =  gridCells.get(new Coordinate(xCoord + 1, yCoord + i + 1));
+                        }
+
+                        if (cell != null) {
+                            cellButton = (Button) cell.getChildren().get(cell.getChildren().size() - 1);
+                            cellButton.getStyleClass().add("placed-ship");
+                            cellButton.setText("S" + shipsPlaced);
+                            occupiedCoords.add(isHorizontal ? new Coordinate(xCoord + i, yCoord) : new Coordinate(xCoord, yCoord + i));
+                        } else {
+                            throw new RuntimeException("Null cell.");
                         }
                     }
 
@@ -316,7 +314,7 @@ public class PreparationView {
             shipBoxVertical.getStyleClass().add("ship-box");
             for (Button ship : shipButtons) {
                 ship.setPrefSize(ship.getHeight(), ship.getWidth());
-                ship.getStyleClass().remove(ship.getStyleClass().size() - 1);
+                ship.getStyleClass().remove("side-menu-ship-button-horizontal");
                 ship.getStyleClass().add("side-menu-ship-button-vertical");
                 setButtonText(ship, isHorizontal);
                 shipBoxVertical.getChildren().add(ship);
@@ -328,7 +326,7 @@ public class PreparationView {
             shipBoxHorizontal.getStyleClass().add("ship-box");
             for (Button ship : shipButtons) {
                 ship.setPrefSize(ship.getHeight(), ship.getWidth());
-                ship.getStyleClass().remove(ship.getStyleClass().size() - 1);
+                ship.getStyleClass().remove("side-menu-ship-button-vertical");
                 ship.getStyleClass().add("side-menu-ship-button-horizontal");
                 setButtonText(ship, isHorizontal);
                 shipBoxHorizontal.getChildren().add(ship);
@@ -350,6 +348,7 @@ public class PreparationView {
         for(StackPane gridCell : gridCells.values()) {
             Button gridButton = (Button) gridCell.getChildren().get(gridCell.getChildren().size() - 1);
             gridButton.setText("");
+            gridButton.getStyleClass().remove("placed-ship");
         }
 
         /* Reset all labels and sideMenu. */
@@ -505,6 +504,7 @@ public class PreparationView {
             boolean success = confirmShipPlacement();
 
             if (success) {
+                resetButton.setOnAction(event1 -> {});
                 statusLabel.setStyle("-fx-background-color: green;");
                 statusLabel.setText("Successfully confirmed placement.");
 
