@@ -1,6 +1,7 @@
 package battleship;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Board {
     private final Coordinate[][] boardMatrix;
@@ -183,5 +184,26 @@ public class Board {
         }
 
         return shipList;
+    }
+
+    /**
+     * Gets all the coordinates associated with a ship (if a ship exists on this coordinate).
+     * @param x horizontal position of coordinate on board.
+     * @param y vertical position of coordinate on board.
+     * @return list of all coordinates of a ship that is on the specified coordinate.
+     * @throws InvalidPlacementException when attempting to access coordinate in invalid location.
+     */
+    public List<Coordinate> getAssociatedShipCoords(int x, int y) throws InvalidPlacementException {
+        return shipManager.stream()
+                .filter(ship -> ship.getCoordinates().contains(new Coordinate(x, y)))
+                .flatMap(ship -> ship.getCoordinates().stream())
+                .map(coordinate -> {
+                    try {
+                        return getCoordinate(coordinate.getX(), coordinate.getY());
+                    } catch (InvalidPlacementException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
     }
 }

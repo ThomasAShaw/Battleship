@@ -256,4 +256,19 @@ public class Game {
 
         return newEvents;
     }
+
+    /**
+     * Get the associated coordinates of any ships that are on a specified coordinate.
+     * @param isPlayerOne true if referring to player one, false otherwise.
+     * @param x horizontal position of coordinate on board.
+     * @param y vertical position of coordinate on board.
+     * @return list of all coordinates of a ship that is on the specified coordinate.
+     */
+    public List<Coordinate> getAssociatedShipCoords (boolean isPlayerOne, int x, int y) {
+        try {
+            return isPlayerOne ? playerOne.getAssociatedShipCoords(x, y) : playerTwo.getAssociatedShipCoords(x, y);
+        } catch (Exception e) {
+            return new ArrayList<Coordinate>();
+        }
+    }
 }

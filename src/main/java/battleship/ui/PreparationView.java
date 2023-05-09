@@ -59,7 +59,7 @@ public class PreparationView {
         preparationLayout.setCenter(mainContent);
 
         Scene preparationViewScene = new Scene(preparationLayout, 1000, 750);
-        preparationViewScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/battleship.css")).toExternalForm()); //FIXME
+        preparationViewScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/battleship.css")).toExternalForm());
 
         return preparationViewScene;
     }
@@ -463,7 +463,6 @@ public class PreparationView {
 
                 Button button = new Button();
                 button.setPrefSize(GRID_CELL_SIZE, GRID_CELL_SIZE);
-                button.setStyle("-fx-background-radius: 0");
                 button.getStyleClass().add("grid-button");
                 gridCell.getChildren().add(button);
                 activePlayerGrid.add(gridCell, x + 1, y + 1);
@@ -509,6 +508,7 @@ public class PreparationView {
                 statusLabel.setText("Successfully confirmed placement.");
 
                 PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                app.shipsAreSet();
                 pause.setOnFinished(e -> app.switchPlayer());
                 pause.play();
             } else {

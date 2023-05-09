@@ -11,6 +11,7 @@
     -font-weight: bold;
     -fx-font-size: 75;
     -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0.5, 0, 5);
 }
 
 /* Main-menu subtitle */
@@ -19,6 +20,7 @@
     -font-weight: bold;
     -fx-font-size: 30;
     -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0.5, 0, 5);
 }
 
 .menu-button {
@@ -55,6 +57,7 @@
     -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
     -fx-font-size: 40;
     -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0.5, 0, 5);
 }
 
 /* Back-to-main-menu-button styles */
@@ -239,4 +242,57 @@
     -fx-border-color: #104E8B;
     -fx-border-width: 2px;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 3, 0.3, 1, 1);
+}
+
+.hit-cell {
+    -fx-background-color: linear-gradient(to bottom, #FF6347 0%, #CD3700 100%, transparent);
+    -fx-border-color: #CD3700;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 3, 0.3, 1, 1);
+}
+
+.miss-cell {
+    -fx-background-color: linear-gradient(to bottom, #87CEEB 0%, #4682B4 100%, transparent);
+    -fx-border-color: #4682B4;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 3, 0.3, 1, 1);
+}
+
+.hit-cell:hover, .sunk-ship-cell:hover {
+    -fx-background-color: linear-gradient(to bottom, #FF7F50 0%, #FF4500 100%);
+    -fx-border-color: #FF4500;
+}
+
+.miss-cell:hover {
+    -fx-background-color: linear-gradient(to bottom, #ADD8E6 0%, #5CACEE 100%);
+    -fx-border-color: #5CACEE;
+}
+
+.sunk-ship-cell {
+    -fx-background-color: linear-gradient(to bottom, #8B0000 0%, #B22222 100%);
+    -fx-border-color: #B22222;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 3, 0.3, 1, 1);
+}
+
+.sunk-ship-cell:hover {
+    -fx-background-color: linear-gradient(to bottom, #B22222 0%, #8B0000 100%);
+    -fx-border-color: #8B0000;
+}
+
+.grid-title {
+    -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
+    -fx-font-size: 30px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 10px;
+    -fx-alignment: center;
+}
+
+.instructions {
+    -fx-font-family: 'Arial Rounded MT Bold', Arial, Sans-serif;
+    -fx-font-size: 20px;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 10px;
+    -fx-text-alignment: center;
 }

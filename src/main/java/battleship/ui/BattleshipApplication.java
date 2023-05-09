@@ -64,13 +64,11 @@ public class BattleshipApplication extends Application {
         switchScene(isPlayerOneTurn ? playerOne.getPlayerView() : playerTwo.getPlayerView());
     }
 
-    // TODO: Implement this to look nicer.
     public void gameOver() {
         VBox endMenu = new VBox();
         endMenu.getStyleClass().add("end-menu");
 
-        Label winnerLabel = new Label( " Wins!");
-        // FIXME: Label winnerLabel = new Label(currentGame.checkWinner() + " Wins!");
+        Label winnerLabel = new Label(currentGame.checkWinner() + " Wins!");
         winnerLabel.getStyleClass().add("winner-label");
 
         Button mainMenuButton = new Button("Back to Main Menu");
@@ -82,5 +80,13 @@ public class BattleshipApplication extends Application {
         gameOverScene.getStylesheets().add(getClass().getResource("/battleship.css").toExternalForm());
 
         switchScene(gameOverScene);
+    }
+
+    public void shipsAreSet() {
+        if (isPlayerOneTurn) {
+            playerOne.shipsAreSet();
+        } else {
+            playerTwo.shipsAreSet();
+        }
     }
 }

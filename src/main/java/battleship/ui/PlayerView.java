@@ -34,9 +34,8 @@ public class PlayerView {
                 case PREPARATION:
                     PreparationView prepView = new PreparationView(app, game, isPlayerOne);
                     currentState = PlayerState.WAITING;
-                    areShipsSet = true; // TODO: implement this.
                     return prepView.getPreparationView();
-                    // TODO: after this point, it should go to the other player.
+                    // After this point, it should go to the other player, if ships are set successfully.
                 case WAITING:
                     if (areShipsSet) {
                         currentState = PlayerState.PLAYING;
@@ -97,5 +96,15 @@ public class PlayerView {
 
         return String.format("linear-gradient(to bottom, rgba(%d, %d, %d, 1), rgba(%d, %d, %d, 1))", red, green, blue, redSecond, greenSecond, blueSecond);
 
+    }
+
+    /**
+     * Confirming the ships are placed successfully.
+     */
+    public void shipsAreSet() {
+        if (!areShipsSet)
+            areShipsSet = true;
+        else
+            throw new RuntimeException("Ships were already set.");
     }
 }

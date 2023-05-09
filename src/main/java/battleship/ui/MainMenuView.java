@@ -42,7 +42,7 @@ public class MainMenuView {
         labels.add(title);
 
         /* Subtitle Label. */
-        Label subtitle = new Label("Created By: Me");
+        Label subtitle = new Label("Created By: Thomas");
         subtitle.getStyleClass().add("subtitle");
         labels.add(subtitle);
 
@@ -61,10 +61,10 @@ public class MainMenuView {
         localMultiplayerButton.setOnAction(event -> onLocalMultiplayerButtonClick());
         buttons.add(localMultiplayerButton);
 
-        Button optionsButton = new Button("Options");
+/*        Button optionsButton = new Button("Options"); TODO. Implement options.
         optionsButton.getStyleClass().add("menu-button");
         optionsButton.setOnAction(event -> onOptionsButtonClick());
-        buttons.add(optionsButton);
+        buttons.add(optionsButton); */
 
         Button quitGameButton = new Button("Quit Game");
         quitGameButton.getStyleClass().add("menu-button");
