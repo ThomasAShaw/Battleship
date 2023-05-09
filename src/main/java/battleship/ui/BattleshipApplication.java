@@ -9,13 +9,15 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.util.Objects;
+
 public class BattleshipApplication extends Application {
     private Game currentGame;
     private Stage stage;
     private Scene activeScene;
     private PlayerView playerOne;
     private PlayerView playerTwo;
-    private MainMenuView mainMenu = new MainMenuView(this);
+    private final MainMenuView mainMenu = new MainMenuView(this);
     private boolean isPlayerOneTurn;
 
     @Override
@@ -77,7 +79,7 @@ public class BattleshipApplication extends Application {
 
         endMenu.getChildren().addAll(winnerLabel, mainMenuButton);
         Scene gameOverScene = new Scene(endMenu, 1000, 750);
-        gameOverScene.getStylesheets().add(getClass().getResource("/battleship.css").toExternalForm());
+        gameOverScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/battleship.css")).toExternalForm());
 
         switchScene(gameOverScene);
     }
