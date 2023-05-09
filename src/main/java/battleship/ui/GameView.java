@@ -162,10 +162,8 @@ public class GameView {
                 if (eventType == GameEventType.HIT) {
                     if (event.getExtraInfo().contains("sunk")) {
                         List<Coordinate> sunkCoords = game.getAssociatedShipCoords(event.getVictim(), coordBoard.getX(), coordBoard.getY());
-                        System.out.println("SUNK!!");
 
                         for (Coordinate coord : sunkCoords) {
-                            System.out.println(coord);
                             Button sunkButton;
                             Coordinate coordOnGrid = new Coordinate(coord.getX() + 1, coord.getY() + 1);
 
@@ -225,6 +223,7 @@ public class GameView {
     // TODO: Implement this.
     private void handleEndGame() {
         game.endGame();
+        updatePlayerGrid();
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
         pause.setOnFinished(e -> app.gameOver());
         pause.play();

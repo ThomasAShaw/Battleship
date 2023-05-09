@@ -233,7 +233,7 @@ public class PreparationView {
                     }
 
                     /* Add ship to placedShips */
-                    System.out.println(xCoord + " " + yCoord);
+                    //System.out.println(xCoord + " " + yCoord);
                     if (isHorizontal) {
                         placedShips.add(new Ship(shipData[0], new Coordinate(xCoord, yCoord), new Coordinate(xCoord + shipLength - 1, yCoord)));
                         // System.out.println((xCoord + shipLength -1) + " " + yCoord);
