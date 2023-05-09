@@ -60,7 +60,7 @@ public class CoordinateTests {
 
     @Test
     public void testGuessingCoordinates() {
-        Coordinate coordA = new Coordinate(-99, -1);
+        Coordinate coordA = new Coordinate(-5, -1);
         Coordinate coordB = new Coordinate(-1, -99);
         Coordinate coordC = new Coordinate(coordB.getX(), coordA.getY());
 
